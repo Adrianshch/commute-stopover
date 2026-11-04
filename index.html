@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#dc241f">
+<title>Commute Stopover</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root {
+  --bg: #f6f5f2; --panel: #ffffff; --ink: #1b1b1f; --muted: #66666e; --line: #e3e1dc; --chip: #efeee9;
+  --central: #dc241f; --central-soft: #fde8e7; --good: #1d7a4a; --far: #8a5a00; --far-soft: #fbf1dc;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.05); --tile-filter: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131316; --panel: #1c1c21; --ink: #ececef; --muted: #9a9aa4; --line: #2d2d34; --chip: #26262d;
+    --central: #ff5a52; --central-soft: #3a1f1f; --good: #4cc489; --far: #f0b54a; --far-soft: #33290f;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+    --tile-filter: invert(1) hue-rotate(180deg) brightness(.9) contrast(.9);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131316; --panel: #1c1c21; --ink: #ececef; --muted: #9a9aa4; --line: #2d2d34; --chip: #26262d;
+  --central: #ff5a52; --central-soft: #3a1f1f; --good: #4cc489; --far: #f0b54a; --far-soft: #33290f;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 4px 16px rgba(0,0,0,.25);
+  --tile-filter: invert(1) hue-rotate(180deg) brightness(.9) contrast(.9);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+.app { display: grid; grid-template-columns: 1fr; min-height: 100vh; }
+.panel { padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+#map { height: 42vh; min-height: 260px; border-bottom: 1px solid var(--line); }
+@media (min-width: 900px) {
+  .app { grid-template-columns: 440px 1fr; height: 100vh; }
+  .panel { overflow-y: auto; height: 100vh; border-right: 1px solid var(--line); padding: 20px; }
+  #map { height: 100vh; border: 0; order: 2; }
+}
+.leaflet-tile-pane { filter: var(--tile-filter); }
+header h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; display: flex; align-items: center; gap: 12px; }
+header h1 .roundel { width: 22px; height: 22px; border-radius: 50%; border: 4px solid var(--central); position: relative; flex: none; }
+header h1 .roundel::after { content: ""; position: absolute; left: -8px; right: -8px; top: 50%; height: 5px; margin-top: -2.5px; background: #10069f; }
+header p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; background: var(--chip); border-radius: 10px; padding: 3px; }
+.seg button { border: 0; background: transparent; padding: 8px 6px; border-radius: 8px; cursor: pointer; font-size: 14px; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--panel); color: var(--ink); box-shadow: var(--shadow); font-weight: 600; }
+form.search { display: flex; gap: 8px; }
+form.search input { flex: 1; min-width: 0; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); outline: none; }
+form.search input:focus { border-color: var(--central); }
+form.search button { border: 0; background: var(--central); color: #fff; padding: 0 16px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--panel); padding: 5px 11px; border-radius: 999px; cursor: pointer; font-size: 13px; }
+.chip:hover { border-color: var(--central); }
+.chip[aria-pressed="true"] { background: var(--central); border-color: var(--central); color: #fff; }
+.settings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; font-size: 13px; color: var(--muted); }
+.settings label { display: flex; flex-direction: column; gap: 4px; }
+.settings output { color: var(--ink); font-weight: 600; }
+.settings input[type=range] { width: 100%; accent-color: var(--central); }
+.line-strip { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px 6px; box-shadow: var(--shadow); }
+.line-strip ol { list-style: none; margin: 0; padding: 0; position: relative; }
+.line-strip ol::before { content: ""; position: absolute; left: 21px; top: 12px; bottom: 12px; width: 4px; background: var(--central); border-radius: 2px; }
+.line-strip li button { width: 100%; display: flex; align-items: center; gap: 10px; border: 0; background: transparent; padding: 4px 8px 4px 14px; cursor: pointer; text-align: left; border-radius: 8px; }
+.line-strip li button:hover { background: var(--chip); }
+.line-strip li button[aria-pressed="true"] { background: var(--central-soft); }
+.line-strip .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--panel); border: 4px solid var(--central); flex: none; position: relative; z-index: 1; }
+.line-strip .end .dot { background: var(--central); }
+.line-strip .sname { flex: 1; font-size: 14px; }
+.line-strip .tag { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-left: 6px; }
+.line-strip .count { font-size: 12px; min-width: 24px; text-align: center; padding: 1px 7px; border-radius: 999px; background: var(--chip); color: var(--muted); }
+.line-strip .count.has { background: var(--central); color: #fff; font-weight: 600; }
+.status { font-size: 13px; color: var(--muted); }
+.status:empty { display: none; }
+.status.err { color: var(--central); }
+.results { display: flex; flex-direction: column; gap: 8px; }
+.results h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 10px 2px 0; font-weight: 600; }
+.results h2 small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; cursor: pointer; box-shadow: var(--shadow); }
+.card:hover, .card.active { border-color: var(--central); }
+.card .name { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+.card .kind { color: var(--muted); font-size: 13px; }
+.card .cost { grid-row: 1 / span 2; grid-column: 2; text-align: right; }
+.card .cost b { display: block; font-size: 20px; line-height: 1.1; color: var(--good); font-variant-numeric: tabular-nums; }
+.card.far .cost b { color: var(--far); }
+.card .cost span { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.card .meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.card .meta .st { color: var(--ink); font-weight: 500; }
+.card .links { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; margin-top: 2px; }
+.card .links a { color: var(--central); text-decoration: none; font-weight: 500; }
+.legs { display: inline-flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.leg { font-size: 11px; padding: 1px 6px; border-radius: 4px; background: var(--chip); color: var(--ink); }
+.empty { color: var(--muted); font-size: 14px; padding: 8px 2px; }
+.more { align-self: flex-start; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+.more:hover { border-color: var(--far); }
+footer { font-size: 12px; color: var(--muted); margin-top: auto; padding-top: 8px; }
+footer a { color: inherit; }
+.leaflet-container { background: var(--bg); font: inherit; }
+.st-label { background: var(--panel); color: var(--ink); border: 1px solid var(--line); box-shadow: none; font-size: 11px; padding: 1px 5px; }
+.st-label::before { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div id="map" aria-label="Map of the Central line route and results"></div>
+  <main class="panel">
+    <header>
+      <h1><span class="roundel" aria-hidden="true"></span>Commute Stopover</h1>
+      <p>Find errands between Woodford and Holborn on the Central line, ranked by how much time each one adds to your trip.</p>
+    </header>
+
+    <div class="seg" role="group" aria-label="Direction">
+      <button type="button" data-dir="home" aria-pressed="true">Holborn → Woodford</button>
+      <button type="button" data-dir="work" aria-pressed="false">Woodford → Holborn</button>
+    </div>
+
+    <form class="search" id="searchForm">
+      <input id="q" type="search" placeholder="pho, tesco, garden centre, ikea…" autocomplete="off" enterkeyhint="search" aria-label="What are you looking for?">
+      <button id="go" type="submit">Search</button>
+    </form>
+
+    <div class="chips" id="chips"></div>
+
+    <div class="settings">
+      <label>Max walk from station (one way)
+        <span><output id="walkOut">8</output> min</span>
+        <input id="walk" type="range" min="2" max="15" step="1" value="8">
+      </label>
+      <label>Cost of getting off mid-trip
+        <span><output id="penOut">5</output> min</span>
+        <input id="pen" type="range" min="0" max="12" step="1" value="5">
+      </label>
+    </div>
+
+    <div class="line-strip"><ol id="stations"></ol></div>
+
+    <div class="status" id="status" role="status"></div>
+    <div class="results" id="results"></div>
+
+    <footer>
+      <b>How the numbers work.</b> Time on the train is the same wherever you get off, so the extra time is just your detour. On the line, that's the walk there and back (straight-line distance × 1.3 at 4.8 km/h), plus the mid-trip cost of exiting, re-entering and waiting for the next train. That cost is skipped at Holborn and Woodford, since you start or finish there anyway. Off the line, it's the TfL Journey Planner round trip from the best Central line station, plus the same mid-trip cost.<br><br>
+      Places data from <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (<span id="gen">…</span>), with off-route search by <a href="https://photon.komoot.io" target="_blank" rel="noopener">Photon</a>. Journey times are powered by TfL Open Data.
+    </footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(() => {
+  // Woodford → Holborn in line order (TfL /Line/central/Route/Sequence). Same as data/stations.json.
+  const STATIONS = [
+    { id: "940GZZLUWOF", name: "Woodford",         lat: 51.606899, lon:  0.033970 },
+    { id: "940GZZLUSWF", name: "South Woodford",   lat: 51.591907, lon:  0.027338 },
+    { id: "940GZZLUSNB", name: "Snaresbrook",      lat: 51.580678, lon:  0.021440 },
+    { id: "940GZZLULYS", name: "Leytonstone",      lat: 51.568324, lon:  0.008194 },
+    { id: "940GZZLULYN", name: "Leyton",           lat: 51.556589, lon: -0.005523 },
+    { id: "940GZZLUSTD", name: "Stratford",        lat: 51.541806, lon: -0.003458 },
+    { id: "940GZZLUMED", name: "Mile End",         lat: 51.525122, lon: -0.033640 },
+    { id: "940GZZLUBLG", name: "Bethnal Green",    lat: 51.527222, lon: -0.055506 },
+    { id: "940GZZLULVT", name: "Liverpool Street", lat: 51.517372, lon: -0.083182 },
+    { id: "940GZZLUBNK", name: "Bank",             lat: 51.513132, lon: -0.090047 },
+    { id: "940GZZLUSPU", name: "St. Paul's",       lat: 51.514936, lon: -0.097567 },
+    { id: "940GZZLUCHL", name: "Chancery Lane",    lat: 51.518247, lon: -0.111583 },
+    { id: "940GZZLUHBN", name: "Holborn",          lat: 51.517580, lon: -0.120475 },
+  ];
+  const HOME = "940GZZLUWOF", WORK = "940GZZLUHBN";
+  const END_IDS = new Set([HOME, WORK]);
+
+  // Presets: [tag, regex] pairs, OR-ed. `far` = text used for the off-route search.
+  const PRESETS = [
+    { label: "Pho",           far: "pho",           f: [["name", "(^|[^a-z])ph(o|ở)([^a-z]|$)"], ["cuisine", "vietnam"]] },
+    { label: "Groceries",     far: "supermarket",   f: [["shop", "^(supermarket|convenience|greengrocer|grocery|deli|food|health_food)$"]] },
+    { label: "Garden centre", far: "garden centre", f: [["shop", "^(garden_centre|garden)$"], ["name", "garden cent(re|er)"]] },
+    { label: "Florist",       far: "florist",       f: [["shop", "^florist$"]] },
+    { label: "Pharmacy",      far: "pharmacy",      f: [["amenity", "^pharmacy$"], ["shop", "^chemist$"], ["healthcare", "^pharmacy$"]] },
+    { label: "Bakery",        far: "bakery",        f: [["shop", "^(bakery|pastry)$"]] },
+    { label: "Coffee",        far: "coffee",        f: [["amenity", "^cafe$"], ["cuisine", "coffee"]] },
+    { label: "Hardware",      far: "hardware",      f: [["shop", "^(hardware|doityourself|trade|paint)$"]] },
+    { label: "IKEA",          far: "ikea",          f: [["brand", "^ikea$"], ["name", "^ikea"]] },
+  ];
+  const SYNONYMS = {
+    grocery: "Groceries", groceries: "Groceries", supermarket: "Groceries", "garden centre": "Garden centre",
+    "garden center": "Garden centre", "garden centres": "Garden centre", chemist: "Pharmacy", pharmacy: "Pharmacy",
+    pho: "Pho", vietnamese: "Pho", coffee: "Coffee", cafe: "Coffee", bakery: "Bakery", diy: "Hardware",
+    hardware: "Hardware", ikea: "IKEA",
+  };
+  const TAG_KEYS = { name: "name", brand: "brand", cuisine: "cuisine", shop: "shop", amenity: "amenity", craft: "craft", leisure: "leisure", healthcare: "healthcare" };
+
+  const WALK_M_PER_MIN = 80, CIRCUITY = 1.3;
+  const OFF_ROUTE_MIN = 3;      // auto-search off the line if fewer on-line results than this
+  const LONDON_BBOX = [-0.40, 51.36, 0.25, 51.70]; // minLon,minLat,maxLon,maxLat
+  const BAD_KINDS = new Set(["parking", "parking_entrance", "bus_stop", "platform", "stop_position", "station", "tram_stop", "warehouse", "construction", "industrial", "office", "commercial", "retail", "yes", "house", "street", "road", "residential"]);
+
+  const $ = (s) => document.querySelector(s);
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  };
+  const state = {
+    dir: store.get("cs.dir", "home"), walk: store.get("cs.walk", 8), pen: store.get("cs.pen", 5),
+    places: null, query: null, stationFilter: null, activeKey: null, far: null, farLoading: false, markers: {},
+  };
+
+  // ---------- map ----------
+  const map = L.map("map");
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  }).addTo(map);
+  const cssVar = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const central = cssVar("--central") || "#dc241f";
+  L.polyline(STATIONS.map((s) => [s.lat, s.lon]), { color: central, weight: 5, opacity: .85 }).addTo(map);
+  STATIONS.forEach((s) => {
+    const end = END_IDS.has(s.id);
+    L.circleMarker([s.lat, s.lon], { radius: end ? 7 : 5, color: central, weight: 3, fillColor: end ? central : "#fff", fillOpacity: 1 })
+      .addTo(map).bindTooltip(s.name, { permanent: end, direction: "right", className: "st-label", offset: [6, 0] })
+      .on("click", () => toggleStation(s.id));
+  });
+  const lineBounds = L.latLngBounds(STATIONS.map((s) => [s.lat, s.lon])).pad(0.08);
+  map.fitBounds(lineBounds);
+  const resultLayer = L.layerGroup().addTo(map);
+  const radiusLayer = L.layerGroup().addTo(map);
+
+  // ---------- helpers ----------
+  function haversine(a, b) {
+    const R = 6371000, r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+    const x = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(x));
+  }
+  const walkMin = (m) => (m * CIRCUITY) / WALK_M_PER_MIN;
+  const reEscape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const safeUrl = (u) => (/^https?:\/\//i.test(u || "") ? u : u ? "https://" + u : "");
+  const orderedStations = () => (state.dir === "home" ? [...STATIONS].reverse() : STATIONS);
+  const nearestStations = (pt, n) => STATIONS.map((s) => ({ s, d: haversine(s, pt) })).sort((a, b) => a.d - b.d).slice(0, n);
+  const pretty = (v) => (v || "").replace(/_/g, " ").replace(/;/g, ", ");
+
+  function parseQuery(text) {
+    const t = text.trim().toLowerCase();
+    const preset = PRESETS.find((p) => p.label.toLowerCase() === t) || PRESETS.find((p) => p.label === SYNONYMS[t]);
+    if (preset) return { label: preset.label, far: preset.far, f: preset.f.map(([k, r]) => [k, new RegExp(r, "i")]) };
+    const r = new RegExp(reEscape(t), "i");
+    const rTag = new RegExp(reEscape(t.replace(/\s+/g, "_")), "i");
+    return { label: text.trim(), far: text.trim(), f: [["name", r], ["brand", r], ["cuisine", rTag], ["shop", rTag], ["amenity", rTag], ["craft", rTag], ["leisure", rTag]] };
+  }
+  const matches = (p, q) => q.f.some(([k, re]) => p[TAG_KEYS[k]] && re.test(p[TAG_KEYS[k]]));
+  function describe(p) {
+    const bits = [];
+    if (p.cuisine) bits.push(pretty(p.cuisine));
+    const kind = p.shop || p.amenity || p.craft || p.leisure || p.healthcare;
+    if (kind && kind !== "yes") bits.push(pretty(kind));
+    return bits.join(" · ");
+  }
+  const address = (p) => [[p.hn, p.st].filter(Boolean).join(" "), p.pc].filter(Boolean).join(", ");
+
+  // ---------- on-line results ----------
+  function computeNear() {
+    if (!state.places || !state.query) return [];
+    const out = [];
+    for (const p of state.places) {
+      if (!matches(p, state.query)) continue;
+      const pt = { lat: p.la, lon: p.lo };
+      const [{ s, d }] = nearestStations(pt, 1);
+      const w = walkMin(d);
+      if (w > state.walk) continue;
+      const isEnd = END_IDS.has(s.id);
+      out.push({ key: p.id, p, lat: p.la, lon: p.lo, station: s, dist: d, walk: w, isEnd, added: 2 * w + (isEnd ? 0 : state.pen) });
+    }
+    return out.sort((a, b) => a.added - b.added || a.dist - b.dist);
+  }
+
+  // ---------- off-line results (Photon + TfL) ----------
+  async function geosearch(text) {
+    const [minLon, minLat, maxLon, maxLat] = LONDON_BBOX;
+    try {
+      const u = `https://photon.komoot.io/api/?q=${encodeURIComponent(text)}&lat=51.535&lon=-0.04&limit=25&lang=en&bbox=${LONDON_BBOX.join(",")}`;
+      const r = await fetch(u);
+      if (!r.ok) throw new Error("photon " + r.status);
+      const j = await r.json();
+      return j.features.map((f) => ({
+        id: `${(f.properties.osm_type || "x").toLowerCase()}${f.properties.osm_id}`, osmType: f.properties.osm_type, osmId: f.properties.osm_id,
+        name: f.properties.name, key: f.properties.osm_key, value: f.properties.osm_value,
+        lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0],
+        addr: [[f.properties.housenumber, f.properties.street].filter(Boolean).join(" "), f.properties.postcode].filter(Boolean).join(", "),
+        area: f.properties.district || f.properties.city || "",
+      }));
+    } catch (e) {
+      const u = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=jsonv2&addressdetails=1&limit=25&bounded=1&viewbox=${minLon},${maxLat},${maxLon},${minLat}`;
+      const r = await fetch(u);
+      if (!r.ok) throw new Error("search servers unavailable");
+      const j = await r.json();
+      return j.map((x) => ({
+        id: `${x.osm_type[0]}${x.osm_id}`, osmType: x.osm_type[0].toUpperCase(), osmId: x.osm_id, name: x.name, key: x.category, value: x.type,
+        lat: +x.lat, lon: +x.lon, addr: [x.address?.house_number, x.address?.road, x.address?.postcode].filter(Boolean).join(" "),
+        area: x.address?.suburb || x.address?.city || "",
+      }));
+    }
+  }
+
+  async function tflMinutes(fromId, lat, lon) {
+    const cacheKey = `cs.tfl.${fromId}.${lat.toFixed(4)},${lon.toFixed(4)}`;
+    const c = store.get(cacheKey, null);
+    if (c && Date.now() - c.at < 7 * 864e5) return c.v;
+    const r = await fetch(`https://api.tfl.gov.uk/Journey/JourneyResults/${fromId}/to/${lat.toFixed(6)},${lon.toFixed(6)}`);
+    if (!r.ok) throw new Error("TfL " + r.status);
+    const j = await r.json();
+    const best = (j.journeys || []).reduce((a, b) => (!a || b.duration < a.duration ? b : a), null);
+    if (!best) return null;
+    const legs = best.legs.map((l) => {
+      const mode = l.mode?.name || "";
+      const name = l.routeOptions?.[0]?.name || "";
+      return mode === "walking" ? `walk ${l.duration}′` : (name || mode);
+    });
+    const v = { min: best.duration, legs };
+    store.set(cacheKey, { at: Date.now(), v });
+    return v;
+  }
+
+  let farSeq = 0;
+  async function runFar() {
+    const q = state.query;
+    if (!q) return;
+    const seq = ++farSeq;
+    state.farLoading = true; state.far = null;
+    render();
+    try {
+      const raw = await geosearch(q.far);
+      if (seq !== farSeq) return;
+      const nearIds = new Set(computeNear().map((i) => i.key));
+      // drop non-places, things already in the on-line list, and near-duplicates (e.g. IKEA + IKEA Restaurant)
+      const cands = [];
+      const norm = (s) => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[\s_-]+/g, " ").trim();
+      const want = norm(q.far);
+      for (const c of raw) {
+        // Photon is fuzzy ("ikea" → "Ikeda"); keep only real matches on name or category
+        if (!norm(c.name).includes(want) && norm(c.value) !== want && !norm(c.value).includes(want)) continue;
+        if (!c.name || BAD_KINDS.has(c.value) || ["highway", "railway", "place", "boundary", "landuse", "building", "public_transport"].includes(c.key)) continue;
+        if (nearIds.has(c.id)) continue;
+        const near = nearestStations(c, 1)[0];
+        if (walkMin(near.d) <= state.walk) continue;
+        const dup = cands.find((o) => haversine(o, c) < 400 && (o.name.toLowerCase().startsWith(c.name.toLowerCase()) || c.name.toLowerCase().startsWith(o.name.toLowerCase())));
+        if (dup) { if (c.key === "shop" && dup.key !== "shop") Object.assign(dup, c); continue; }
+        cands.push({ ...c, straight: near.d });
+      }
+      cands.sort((a, b) => a.straight - b.straight);
+      const top = cands.slice(0, 6);
+      const results = await Promise.all(top.map(async (c) => {
+        const tries = nearestStations(c, 3);
+        let best = null;
+        for (const { s } of tries) {
+          try {
+            const j = await tflMinutes(s.id, c.lat, c.lon);
+            if (j && (!best || j.min + (END_IDS.has(s.id) ? 0 : state.pen) / 2 < best.j.min + (END_IDS.has(best.s.id) ? 0 : state.pen) / 2)) best = { s, j };
+          } catch {}
+        }
+        if (!best) {
+          const s = tries[0].s;
+          return { c, station: s, oneWay: walkMin(tries[0].d) * 0.5 + 10, legs: ["estimate"], estimated: true };
+        }
+        return { c, station: best.s, oneWay: best.j.min, legs: best.j.legs };
+      }));
+      if (seq !== farSeq) return;
+      state.far = results.map((r) => {
+        const isEnd = END_IDS.has(r.station.id);
+        return { ...r, key: "far:" + r.c.id, lat: r.c.lat, lon: r.c.lon, isEnd, added: 2 * r.oneWay + (isEnd ? 0 : state.pen) };
+      }).sort((a, b) => a.added - b.added);
+    } catch (e) {
+      if (seq !== farSeq) return;
+      state.far = [];
+      state.farError = e.message;
+    } finally {
+      if (seq === farSeq) { state.farLoading = false; render(); fitToResults(); }
+    }
+  }
+
+  // ---------- render ----------
+  function renderStations(items) {
+    const counts = {};
+    items.forEach((i) => (counts[i.station.id] = (counts[i.station.id] || 0) + 1));
+    const list = orderedStations();
+    $("#stations").innerHTML = list.map((s) => {
+      const label = s.id === HOME ? "home" : s.id === WORK ? "work" : "";
+      const c = counts[s.id] || 0;
+      return `<li class="${END_IDS.has(s.id) ? "end" : ""}"><button type="button" data-st="${s.id}" aria-pressed="${state.stationFilter === s.id}">
+        <span class="dot"></span><span class="sname">${esc(s.name)}${label ? `<span class="tag">${label}</span>` : ""}</span>
+        ${state.query ? `<span class="count ${c ? "has" : ""}">${c}</span>` : ""}</button></li>`;
+    }).join("");
+  }
+
+  function nearCard(i) {
+    const p = i.p, name = p.name || p.brand, addr = address(p);
+    const gmaps = `https://www.google.com/maps/dir/?api=1&origin=${i.station.lat},${i.station.lon}&destination=${i.lat},${i.lon}&travelmode=walking`;
+    const osm = `https://www.openstreetmap.org/${{ n: "node", w: "way", r: "relation" }[p.id[0]]}/${p.id.slice(1)}`;
+    return `<article class="card ${state.activeKey === i.key ? "active" : ""}" data-key="${esc(i.key)}">
+      <div class="name">${esc(name)}</div>
+      <div class="cost"><b>+${Math.round(i.added)}</b><span>min added</span></div>
+      <div class="kind">${esc(describe(p))}</div>
+      <div class="meta"><span class="st">${esc(i.station.name)}</span>
+        <span>${Math.max(1, Math.round(i.walk))} min walk each way (${Math.round(i.dist)} m)${i.isEnd ? "" : ` + ${state.pen} min mid-trip`}</span>
+        ${addr ? `<span>${esc(addr)}</span>` : ""}${p.oh ? `<span>🕑 ${esc(p.oh)}</span>` : ""}</div>
+      <div class="links"><a href="${gmaps}" target="_blank" rel="noopener">Walking directions</a>
+        ${p.web ? `<a href="${esc(safeUrl(p.web))}" target="_blank" rel="noopener">Website</a>` : ""}
+        <a href="${osm}" target="_blank" rel="noopener">OSM</a></div>
+    </article>`;
+  }
+
+  function farCard(i) {
+    const c = i.c;
+    const gmaps = `https://www.google.com/maps/dir/?api=1&origin=${i.station.lat},${i.station.lon}&destination=${c.lat},${c.lon}&travelmode=transit`;
+    const osm = c.osmType ? `https://www.openstreetmap.org/${{ N: "node", W: "way", R: "relation" }[c.osmType] || "node"}/${c.osmId}` : "";
+    return `<article class="card far ${state.activeKey === i.key ? "active" : ""}" data-key="${esc(i.key)}">
+      <div class="name">${esc(c.name)}${c.area ? ` <span class="kind">· ${esc(c.area)}</span>` : ""}</div>
+      <div class="cost"><b>+${Math.round(i.added)}</b><span>min added</span></div>
+      <div class="kind">${esc(pretty(c.value))}</div>
+      <div class="meta"><span class="st">From ${esc(i.station.name)}</span>
+        <span>${Math.round(i.oneWay)} min each way${i.estimated ? " (rough estimate)" : ""}${i.isEnd ? "" : ` + ${state.pen} min mid-trip`}</span>
+        <span class="legs">${i.legs.map((l) => `<span class="leg">${esc(l)}</span>`).join("")}</span>
+        ${c.addr ? `<span>${esc(c.addr)}</span>` : ""}</div>
+      <div class="links"><a href="${gmaps}" target="_blank" rel="noopener">Transit directions</a>
+        ${osm ? `<a href="${osm}" target="_blank" rel="noopener">OSM</a>` : ""}</div>
+    </article>`;
+  }
+
+  function render() {
+    const all = computeNear();
+    renderStations(all);
+    const near = state.stationFilter ? all.filter((i) => i.station.id === state.stationFilter) : all;
+
+    resultLayer.clearLayers(); radiusLayer.clearLayers(); state.markers = {};
+    if (state.query) {
+      const r = (state.walk * WALK_M_PER_MIN) / CIRCUITY;
+      STATIONS.forEach((s) => {
+        if (state.stationFilter && state.stationFilter !== s.id) return;
+        L.circle([s.lat, s.lon], { radius: r, color: central, weight: 1, opacity: .35, fillOpacity: .04, interactive: false }).addTo(radiusLayer);
+      });
+    }
+    const good = cssVar("--good"), farC = cssVar("--far");
+    near.forEach((i, n) => {
+      state.markers[i.key] = L.circleMarker([i.lat, i.lon], { radius: n < 3 ? 8 : 6, color: "#fff", weight: 2, fillColor: n < 3 ? good : "#2d6cdf", fillOpacity: .95 })
+        .addTo(resultLayer).bindPopup(`<b>${esc(i.p.name || i.p.brand)}</b><br>+${Math.round(i.added)} min · ${esc(i.station.name)}`)
+        .on("click", () => setActive(i.key, false));
+    });
+    (state.far || []).forEach((i) => {
+      L.polyline([[i.station.lat, i.station.lon], [i.lat, i.lon]], { color: farC, weight: 2, dashArray: "4 6", opacity: .8, interactive: false }).addTo(resultLayer);
+      state.markers[i.key] = L.circleMarker([i.lat, i.lon], { radius: 8, color: "#fff", weight: 2, fillColor: farC, fillOpacity: .95 })
+        .addTo(resultLayer).bindPopup(`<b>${esc(i.c.name)}</b><br>+${Math.round(i.added)} min from ${esc(i.station.name)}`)
+        .on("click", () => setActive(i.key, false));
+    });
+
+    const box = $("#results");
+    if (!state.query) { box.innerHTML = ""; return; }
+    let html = `<h2>On the line <small>· within ${state.walk} min walk</small></h2>`;
+    if (near.length) {
+      html += near.slice(0, 60).map(nearCard).join("");
+      if (near.length > 60) html += `<div class="empty">Showing the 60 quickest of ${near.length}.</div>`;
+    } else {
+      html += `<div class="empty">Nothing within ${state.walk} min of ${state.stationFilter ? "this station" : "any station"}.</div>`;
+    }
+    if (!state.stationFilter) {
+      if (state.farLoading) html += `<h2>Off the line</h2><div class="empty">Looking further afield and asking TfL for journey times…</div>`;
+      else if (state.far) {
+        html += `<h2>Off the line <small>· nearest to the route, by TfL journey time</small></h2>`;
+        html += state.far.length ? state.far.map(farCard).join("") : `<div class="empty">${state.farError ? "Couldn't search further afield: " + esc(state.farError) : "Nothing else found in London."}</div>`;
+      } else html += `<button type="button" class="more" id="moreBtn">Also look off the line →</button>`;
+    }
+    box.innerHTML = html;
+  }
+
+  function fitToResults() {
+    const pts = [];
+    computeNear().forEach((i) => { if (!state.stationFilter || i.station.id === state.stationFilter) pts.push([i.lat, i.lon]); });
+    (state.far || []).forEach((i) => pts.push([i.lat, i.lon]));
+    if (state.stationFilter) {
+      const s = STATIONS.find((x) => x.id === state.stationFilter);
+      pts.push([s.lat, s.lon]);
+      map.fitBounds(L.latLngBounds(pts).pad(0.25), { maxZoom: 17 });
+      return;
+    }
+    const b = L.latLngBounds(STATIONS.map((s) => [s.lat, s.lon]));
+    if (state.far?.length) state.far.forEach((i) => b.extend([i.lat, i.lon]));
+    map.fitBounds(b.pad(0.08));
+  }
+
+  function setActive(key, pan = true) {
+    state.activeKey = key;
+    document.querySelectorAll(".card").forEach((c) => c.classList.toggle("active", c.dataset.key === key));
+    const m = state.markers[key];
+    if (m) { if (pan) map.setView(m.getLatLng(), Math.max(map.getZoom(), key.startsWith("far:") ? 14 : 16)); m.openPopup(); }
+    if (!pan) document.querySelector(`.card[data-key="${CSS.escape(key)}"]`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function toggleStation(id) {
+    state.stationFilter = state.stationFilter === id ? null : id;
+    render();
+    if (state.query) fitToResults();
+    else if (state.stationFilter) { const s = STATIONS.find((x) => x.id === id); map.setView([s.lat, s.lon], 16); }
+    else map.fitBounds(lineBounds);
+  }
+
+  async function search(text) {
+    if (!text.trim()) return;
+    state.query = parseQuery(text);
+    state.activeKey = null; state.far = null; state.farError = null; farSeq++; state.farLoading = false;
+    $("#q").value = text;
+    document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", c.dataset.label === state.query.label));
+    try { history.replaceState(null, "", "?q=" + encodeURIComponent(text)); } catch {}
+    await placesReady;
+    render(); fitToResults();
+    if (computeNear().length < OFF_ROUTE_MIN) runFar();
+  }
+
+  // ---------- data + wiring ----------
+  const status = $("#status");
+  status.textContent = "Loading places near the line…";
+  const placesReady = fetch("data/places.json").then((r) => r.json()).then((j) => {
+    state.places = j.places;
+    $("#gen").textContent = `${j.places.length.toLocaleString()} places, updated ${j.generated}`;
+    status.textContent = "";
+  }).catch((e) => { status.textContent = "Couldn't load places data: " + e.message; status.classList.add("err"); });
+
+  $("#chips").innerHTML = PRESETS.map((p) => `<button type="button" class="chip" data-label="${esc(p.label)}" aria-pressed="false">${esc(p.label)}</button>`).join("");
+  $("#chips").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (b) search(b.dataset.label); });
+  $("#searchForm").addEventListener("submit", (e) => { e.preventDefault(); $("#q").blur(); search($("#q").value); });
+  $("#stations").addEventListener("click", (e) => { const b = e.target.closest("button[data-st]"); if (b) toggleStation(b.dataset.st); });
+  $("#results").addEventListener("click", (e) => {
+    if (e.target.closest("#moreBtn")) { runFar(); return; }
+    if (e.target.closest("a")) return;
+    const c = e.target.closest(".card");
+    if (c) setActive(c.dataset.key, true);
+  });
+  document.querySelectorAll(".seg button").forEach((b) => {
+    b.setAttribute("aria-pressed", b.dataset.dir === state.dir);
+    b.addEventListener("click", () => {
+      state.dir = b.dataset.dir; store.set("cs.dir", state.dir);
+      document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+      render();
+    });
+  });
+  const bindRange = (id, key) => {
+    const el = $("#" + id), out = $("#" + id + "Out");
+    el.value = state[key]; out.textContent = state[key];
+    el.addEventListener("input", () => {
+      state[key] = +el.value; out.textContent = el.value; store.set("cs." + key, state[key]);
+      if (state.far) state.far.forEach((i) => (i.added = 2 * i.oneWay + (i.isEnd ? 0 : state.pen)));
+      if (state.far) state.far.sort((a, b) => a.added - b.added);
+      render();
+    });
+  };
+  bindRange("walk", "walk");
+  bindRange("pen", "pen");
+
+  render();
+  const initial = new URLSearchParams(location.search).get("q");
+  if (initial) search(initial);
+})();
+</script>
+</body>
+</html>

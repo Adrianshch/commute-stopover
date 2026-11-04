@@ -1,0 +1,80 @@
+[
+ {
+  "id": "940GZZLUWOF",
+  "name": "Woodford",
+  "lat": 51.606899,
+  "lon": 0.03397
+ },
+ {
+  "id": "940GZZLUSWF",
+  "name": "South Woodford",
+  "lat": 51.591907,
+  "lon": 0.027338
+ },
+ {
+  "id": "940GZZLUSNB",
+  "name": "Snaresbrook",
+  "lat": 51.580678,
+  "lon": 0.02144
+ },
+ {
+  "id": "940GZZLULYS",
+  "name": "Leytonstone",
+  "lat": 51.568324,
+  "lon": 0.008194
+ },
+ {
+  "id": "940GZZLULYN",
+  "name": "Leyton",
+  "lat": 51.556589,
+  "lon": -0.005523
+ },
+ {
+  "id": "940GZZLUSTD",
+  "name": "Stratford",
+  "lat": 51.541806,
+  "lon": -0.003458
+ },
+ {
+  "id": "940GZZLUMED",
+  "name": "Mile End",
+  "lat": 51.525122,
+  "lon": -0.03364
+ },
+ {
+  "id": "940GZZLUBLG",
+  "name": "Bethnal Green",
+  "lat": 51.527222,
+  "lon": -0.055506
+ },
+ {
+  "id": "940GZZLULVT",
+  "name": "Liverpool Street",
+  "lat": 51.517372,
+  "lon": -0.083182
+ },
+ {
+  "id": "940GZZLUBNK",
+  "name": "Bank",
+  "lat": 51.513132,
+  "lon": -0.090047
+ },
+ {
+  "id": "940GZZLUSPU",
+  "name": "St. Paul's",
+  "lat": 51.514936,
+  "lon": -0.097567
+ },
+ {
+  "id": "940GZZLUCHL",
+  "name": "Chancery Lane",
+  "lat": 51.518247,
+  "lon": -0.111583
+ },
+ {
+  "id": "940GZZLUHBN",
+  "name": "Holborn",
+  "lat": 51.51758,
+  "lon": -0.120475
+ }
+]
