@@ -1,19 +1,43 @@
 # Commute Stopover
 
-Find errands along my Central line commute (Woodford ⇄ Holborn), ranked by the extra time each stop adds.
+Find food and errands within a 15-minute walk of my Central line commute (Woodford ⇄ Holborn) and of Bush House (work, walked from Holborn). Results are sorted by walk time from the nearest stop.
 
-- **On the line**: places within walking distance of the 13 stations. Added time = walk there and back + a "mid-trip" cost (exit, re-enter, wait for next train) at intermediate stations.
-- **Off the line**: if there's little on the route (e.g. IKEA), it searches wider London and asks the TfL Journey Planner for the round trip from the best Central line station.
+## How search works (free, no API keys)
 
-Two data sources:
+- **Places:** a weekly OpenStreetMap snapshot of everything named near the 13 stations and Bush House (`data/places.json`, built by `scripts/build_places.py`).
+- **Food knowledge** (`data/food.json`), hand-written and easy to extend:
+  - *groups*: "mexican" also matches tex-mex, tacos and burritos; "asian" matches chinese, korean, oriental and more
+  - *types*: "grocery" means supermarket, convenience, greengrocer and so on; "boots" also means shoe shops
+  - *dishes*: "dosa" is confirmed by a name or menu, and is *likely* at South Indian or Sri Lankan places
+  - *nameHints*: guesses a cuisine from the name ("China Ark" → chinese), since about half of places have no cuisine tag
+  - *chains*: known menus (Wagamama → ramen, Dishoom → lassi)
+- **Menus:** `scripts/crawl_menus.py` reads each restaurant website's home and menu pages, PDF menus included, and records which dish words appear (`data/menus.json`).
+- Results come in two groups: **Serves X** (confirmed by name, cuisine tag, menu or chain) and **Might serve X** (the cuisine usually has it).
+- **Off the line:** if fewer than 3 places are confirmed nearby, it searches wider London with [Photon](https://photon.komoot.io) and shows the TfL Journey Planner time from the best stop.
 
-| | Google Maps (with your key) | OpenStreetMap (no key) |
-|---|---|---|
-| Search quality | Google's full search: "dim sum" finds Chinese restaurants that serve it, "boots" finds both kinds | Name/tag matching on a weekly snapshot |
-| Ratings, live hours, photos | Yes | Hours only where mapped |
-| Cost | Free up to 1,000 searches/month (see below) | Free |
+There's no free source of reviews, so unlike Google it can't search review text. Menus and the knowledge file stand in for that.
 
-Static site: `index.html` + `data/`. The Google key is pasted into the page and stored only in that browser's localStorage, so it's never in this public repo.
+## Refresh the data
+
+```bash
+pip install pypdf
+python3 scripts/build_places.py
+python3 scripts/crawl_menus.py
+```
+
+The `Refresh places and menus` workflow does this every Monday, and GitHub Pages redeploys automatically.
+
+## Run locally
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open http://localhost:8000/?q=dosa
+
+## Google Maps mode (paused)
+
+The page also supports Google Places search (ratings, live hours, photos) once a key is pasted into the "Google Maps data" panel. It's paused for now; the setup notes are kept below.
 
 ## Google Maps setup
 

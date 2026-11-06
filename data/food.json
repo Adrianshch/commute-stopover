@@ -1,0 +1,4060 @@
+{
+ "_about": "Food knowledge for Commute Stopover search. Cuisine values use OpenStreetMap cuisine=* tags. 'groups': a query for the key also matches places tagged with any listed cuisine. 'dishes': terms people search for; a place 'serves' it if its name, description, cuisine tag or scanned menu mentions a term; it 'might serve' it if its cuisine is in strong (likely) or weak (sometimes). 'nameHints': regex on the place name implying a cuisine (for the ~half of places with no cuisine tag). 'chains': brand/name prefix to cuisines and dishes known to be on the menu.",
+ "groups": {
+  "mexican": [
+   "mexican",
+   "tex-mex",
+   "taco",
+   "tacos",
+   "burrito",
+   "burritos",
+   "taqueria"
+  ],
+  "tex-mex": [
+   "tex-mex",
+   "mexican"
+  ],
+  "latin american": [
+   "latin_american",
+   "mexican",
+   "peruvian",
+   "brazilian",
+   "argentinian",
+   "colombian",
+   "venezuelan",
+   "cuban"
+  ],
+  "indian": [
+   "indian",
+   "south_indian",
+   "north_indian",
+   "punjabi",
+   "bengali",
+   "gujarati",
+   "kerala",
+   "goan",
+   "hyderabadi",
+   "indian_street_food",
+   "curry",
+   "nepalese",
+   "pakistani",
+   "bangladeshi",
+   "sri_lankan"
+  ],
+  "south indian": [
+   "south_indian",
+   "kerala",
+   "tamil",
+   "chettinad",
+   "sri_lankan"
+  ],
+  "pakistani": [
+   "pakistani",
+   "punjabi"
+  ],
+  "bangladeshi": [
+   "bangladeshi",
+   "bengali"
+  ],
+  "sri lankan": [
+   "sri_lankan"
+  ],
+  "nepalese": [
+   "nepalese",
+   "himalayan",
+   "tibetan"
+  ],
+  "chinese": [
+   "chinese",
+   "cantonese",
+   "sichuan",
+   "szechuan",
+   "hunan",
+   "shanghainese",
+   "dim_sum",
+   "hong_kong",
+   "dumpling",
+   "dumplings",
+   "hot_pot",
+   "noodle",
+   "noodles",
+   "taiwanese",
+   "malaysian_chinese",
+   "oriental"
+  ],
+  "cantonese": [
+   "cantonese",
+   "dim_sum",
+   "hong_kong"
+  ],
+  "sichuan": [
+   "sichuan",
+   "szechuan"
+  ],
+  "taiwanese": [
+   "taiwanese",
+   "bubble_tea"
+  ],
+  "japanese": [
+   "japanese",
+   "sushi",
+   "ramen",
+   "udon",
+   "izakaya",
+   "katsu",
+   "teppanyaki",
+   "yakitori",
+   "donburi",
+   "bento"
+  ],
+  "sushi": [
+   "sushi",
+   "japanese"
+  ],
+  "korean": [
+   "korean",
+   "korean_bbq",
+   "korean_fried_chicken"
+  ],
+  "thai": [
+   "thai"
+  ],
+  "vietnamese": [
+   "vietnamese",
+   "pho",
+   "banh_mi"
+  ],
+  "malaysian": [
+   "malaysian",
+   "singaporean",
+   "indonesian"
+  ],
+  "indonesian": [
+   "indonesian"
+  ],
+  "filipino": [
+   "filipino"
+  ],
+  "asian": [
+   "asian",
+   "pan_asian",
+   "chinese",
+   "japanese",
+   "thai",
+   "vietnamese",
+   "korean",
+   "malaysian",
+   "indonesian",
+   "singaporean",
+   "taiwanese",
+   "filipino",
+   "oriental"
+  ],
+  "italian": [
+   "italian",
+   "pizza",
+   "pasta",
+   "italian_pizza",
+   "gelato"
+  ],
+  "pizza": [
+   "pizza",
+   "italian_pizza",
+   "neapolitan"
+  ],
+  "pasta": [
+   "pasta",
+   "italian"
+  ],
+  "french": [
+   "french",
+   "crepe",
+   "bistro"
+  ],
+  "spanish": [
+   "spanish",
+   "tapas"
+  ],
+  "portuguese": [
+   "portuguese",
+   "peri_peri"
+  ],
+  "greek": [
+   "greek",
+   "gyros",
+   "souvlaki"
+  ],
+  "turkish": [
+   "turkish",
+   "kebab",
+   "turkish_grill",
+   "ocakbasi"
+  ],
+  "lebanese": [
+   "lebanese",
+   "middle_eastern"
+  ],
+  "middle eastern": [
+   "middle_eastern",
+   "lebanese",
+   "syrian",
+   "persian",
+   "iranian",
+   "israeli",
+   "arab",
+   "turkish",
+   "kebab",
+   "falafel",
+   "shawarma",
+   "iraqi",
+   "yemeni"
+  ],
+  "persian": [
+   "persian",
+   "iranian"
+  ],
+  "mediterranean": [
+   "mediterranean",
+   "greek",
+   "lebanese",
+   "turkish",
+   "italian",
+   "spanish",
+   "middle_eastern"
+  ],
+  "african": [
+   "african",
+   "ethiopian",
+   "eritrean",
+   "nigerian",
+   "ghanaian",
+   "somali",
+   "senegalese",
+   "west_african",
+   "moroccan"
+  ],
+  "ethiopian": [
+   "ethiopian",
+   "eritrean"
+  ],
+  "nigerian": [
+   "nigerian",
+   "west_african",
+   "african"
+  ],
+  "caribbean": [
+   "caribbean",
+   "jamaican",
+   "trinidadian"
+  ],
+  "jamaican": [
+   "jamaican",
+   "caribbean"
+  ],
+  "american": [
+   "american",
+   "burger",
+   "barbecue",
+   "bbq",
+   "diner",
+   "hot_dog",
+   "steak_house",
+   "chicken",
+   "wings"
+  ],
+  "burger": [
+   "burger",
+   "burgers",
+   "american"
+  ],
+  "bbq": [
+   "barbecue",
+   "bbq",
+   "american",
+   "smokehouse"
+  ],
+  "british": [
+   "british",
+   "english",
+   "regional",
+   "fish_and_chips",
+   "pie",
+   "gastropub"
+  ],
+  "fish and chips": [
+   "fish_and_chips"
+  ],
+  "seafood": [
+   "seafood",
+   "fish",
+   "fish_and_chips",
+   "oyster",
+   "sushi"
+  ],
+  "steak": [
+   "steak_house",
+   "steak",
+   "grill",
+   "argentinian"
+  ],
+  "chicken": [
+   "chicken",
+   "fried_chicken",
+   "peri_peri",
+   "wings",
+   "korean_fried_chicken"
+  ],
+  "peruvian": [
+   "peruvian"
+  ],
+  "brazilian": [
+   "brazilian"
+  ],
+  "argentinian": [
+   "argentinian"
+  ],
+  "polish": [
+   "polish"
+  ],
+  "german": [
+   "german"
+  ],
+  "georgian": [
+   "georgian"
+  ],
+  "russian": [
+   "russian",
+   "ukrainian"
+  ],
+  "vegan": [
+   "vegan"
+  ],
+  "vegetarian": [
+   "vegetarian",
+   "vegan"
+  ],
+  "coffee": [
+   "coffee_shop",
+   "coffee"
+  ],
+  "bakery": [
+   "bakery",
+   "pastry",
+   "cake",
+   "bread"
+  ],
+  "dessert": [
+   "dessert",
+   "cake",
+   "ice_cream",
+   "gelato",
+   "donut",
+   "crepe",
+   "waffle",
+   "frozen_yogurt",
+   "pastry",
+   "patisserie"
+  ],
+  "ice cream": [
+   "ice_cream",
+   "gelato",
+   "frozen_yogurt"
+  ],
+  "bubble tea": [
+   "bubble_tea"
+  ],
+  "breakfast": [
+   "breakfast",
+   "brunch",
+   "cafe",
+   "english"
+  ],
+  "brunch": [
+   "brunch",
+   "breakfast"
+  ],
+  "sandwich": [
+   "sandwich",
+   "deli",
+   "bagel"
+  ],
+  "salad": [
+   "salad",
+   "healthy",
+   "poke"
+  ],
+  "juice": [
+   "juice",
+   "smoothie"
+  ],
+  "oriental": [
+   "asian",
+   "pan_asian",
+   "chinese",
+   "japanese",
+   "thai",
+   "vietnamese",
+   "korean",
+   "malaysian",
+   "indonesian",
+   "singaporean",
+   "taiwanese",
+   "filipino",
+   "oriental"
+  ],
+  "international": [
+   "international",
+   "world",
+   "continental",
+   "european",
+   "eastern_european",
+   "global"
+  ],
+  "eastern european": [
+   "eastern_european",
+   "polish",
+   "romanian",
+   "lithuanian",
+   "bulgarian",
+   "ukrainian",
+   "russian",
+   "latvian"
+  ],
+  "romanian": [
+   "romanian"
+  ],
+  "halal": [
+   "halal"
+  ]
+ },
+ "dishes": [
+  {
+   "terms": [
+    "dosa",
+    "dosai",
+    "masala dosa",
+    "uttapam",
+    "uthappam"
+   ],
+   "strong": [
+    "south_indian",
+    "sri_lankan",
+    "kerala",
+    "tamil",
+    "chettinad"
+   ],
+   "weak": [
+    "indian",
+    "indian_street_food"
+   ]
+  },
+  {
+   "terms": [
+    "idli",
+    "idly",
+    "vada",
+    "sambar",
+    "rasam"
+   ],
+   "strong": [
+    "south_indian",
+    "sri_lankan",
+    "kerala",
+    "tamil"
+   ],
+   "weak": [
+    "indian"
+   ]
+  },
+  {
+   "terms": [
+    "hopper",
+    "hoppers",
+    "kottu",
+    "string hoppers"
+   ],
+   "strong": [
+    "sri_lankan"
+   ],
+   "weak": [
+    "south_indian"
+   ]
+  },
+  {
+   "terms": [
+    "lassi",
+    "mango lassi"
+   ],
+   "strong": [
+    "indian",
+    "pakistani",
+    "punjabi",
+    "north_indian",
+    "indian_street_food"
+   ],
+   "weak": [
+    "bangladeshi",
+    "nepalese",
+    "south_indian",
+    "sri_lankan"
+   ]
+  },
+  {
+   "terms": [
+    "biryani",
+    "biriyani"
+   ],
+   "strong": [
+    "indian",
+    "pakistani",
+    "hyderabadi",
+    "bangladeshi"
+   ],
+   "weak": [
+    "sri_lankan",
+    "south_indian",
+    "nepalese",
+    "persian"
+   ]
+  },
+  {
+   "terms": [
+    "curry"
+   ],
+   "strong": [
+    "indian",
+    "pakistani",
+    "bangladeshi",
+    "sri_lankan",
+    "thai",
+    "japanese",
+    "caribbean",
+    "malaysian",
+    "nepalese",
+    "south_indian",
+    "curry"
+   ],
+   "weak": [
+    "chinese",
+    "asian",
+    "vietnamese"
+   ]
+  },
+  {
+   "terms": [
+    "tikka masala",
+    "butter chicken",
+    "korma",
+    "vindaloo",
+    "madras",
+    "jalfrezi",
+    "rogan josh",
+    "balti",
+    "dhansak",
+    "saag",
+    "dal",
+    "dhal",
+    "daal",
+    "paneer",
+    "tandoori",
+    "tikka"
+   ],
+   "strong": [
+    "indian",
+    "pakistani",
+    "bangladeshi",
+    "north_indian",
+    "punjabi",
+    "curry"
+   ],
+   "weak": [
+    "nepalese",
+    "indian_street_food"
+   ]
+  },
+  {
+   "terms": [
+    "naan",
+    "roti",
+    "paratha",
+    "chapati"
+   ],
+   "strong": [
+    "indian",
+    "pakistani",
+    "bangladeshi",
+    "punjabi",
+    "north_indian"
+   ],
+   "weak": [
+    "nepalese",
+    "caribbean",
+    "malaysian",
+    "south_indian",
+    "sri_lankan"
+   ]
+  },
+  {
+   "terms": [
+    "samosa",
+    "pakora",
+    "bhaji",
+    "onion bhaji",
+    "chaat",
+    "pani puri",
+    "bhel puri",
+    "vada pav",
+    "pav bhaji"
+   ],
+   "strong": [
+    "indian",
+    "indian_street_food",
+    "pakistani",
+    "punjabi",
+    "gujarati"
+   ],
+   "weak": [
+    "bangladeshi",
+    "nepalese",
+    "south_indian"
+   ]
+  },
+  {
+   "terms": [
+    "thali"
+   ],
+   "strong": [
+    "indian",
+    "gujarati",
+    "south_indian",
+    "indian_street_food"
+   ],
+   "weak": [
+    "nepalese",
+    "pakistani"
+   ]
+  },
+  {
+   "terms": [
+    "momo",
+    "momos"
+   ],
+   "strong": [
+    "nepalese",
+    "tibetan",
+    "himalayan"
+   ],
+   "weak": [
+    "indian"
+   ]
+  },
+  {
+   "terms": [
+    "ramen",
+    "tonkotsu",
+    "shoyu ramen",
+    "miso ramen"
+   ],
+   "strong": [
+    "ramen",
+    "japanese",
+    "noodle",
+    "noodles"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "sushi",
+    "korean",
+    "chinese"
+   ]
+  },
+  {
+   "terms": [
+    "udon"
+   ],
+   "strong": [
+    "udon",
+    "japanese"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "sushi",
+    "ramen"
+   ]
+  },
+  {
+   "terms": [
+    "soba"
+   ],
+   "strong": [
+    "japanese"
+   ],
+   "weak": [
+    "asian",
+    "sushi",
+    "ramen"
+   ]
+  },
+  {
+   "terms": [
+    "sushi",
+    "sashimi",
+    "maki",
+    "nigiri",
+    "uramaki",
+    "temaki",
+    "california roll"
+   ],
+   "strong": [
+    "sushi",
+    "japanese"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "poke",
+    "korean"
+   ]
+  },
+  {
+   "terms": [
+    "katsu",
+    "katsu curry",
+    "tonkatsu",
+    "chicken katsu"
+   ],
+   "strong": [
+    "japanese",
+    "katsu"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "sushi",
+    "ramen"
+   ]
+  },
+  {
+   "terms": [
+    "gyoza",
+    "gyozas"
+   ],
+   "strong": [
+    "japanese",
+    "ramen"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "sushi",
+    "chinese"
+   ]
+  },
+  {
+   "terms": [
+    "tempura",
+    "donburi",
+    "teriyaki",
+    "yakitori",
+    "bento",
+    "onigiri",
+    "okonomiyaki",
+    "takoyaki",
+    "karaage",
+    "edamame"
+   ],
+   "strong": [
+    "japanese"
+   ],
+   "weak": [
+    "sushi",
+    "ramen",
+    "asian",
+    "pan_asian"
+   ]
+  },
+  {
+   "terms": [
+    "matcha",
+    "matcha latte"
+   ],
+   "strong": [
+    "japanese",
+    "tea",
+    "bubble_tea"
+   ],
+   "weak": [
+    "coffee_shop",
+    "dessert"
+   ]
+  },
+  {
+   "terms": [
+    "mochi",
+    "dorayaki",
+    "taiyaki"
+   ],
+   "strong": [
+    "japanese",
+    "dessert"
+   ],
+   "weak": [
+    "asian",
+    "bubble_tea"
+   ]
+  },
+  {
+   "terms": [
+    "pho",
+    "phở"
+   ],
+   "strong": [
+    "vietnamese",
+    "pho"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian"
+   ]
+  },
+  {
+   "terms": [
+    "banh mi",
+    "bánh mì"
+   ],
+   "strong": [
+    "vietnamese",
+    "banh_mi"
+   ],
+   "weak": [
+    "asian",
+    "sandwich"
+   ]
+  },
+  {
+   "terms": [
+    "bun cha",
+    "bun bo hue",
+    "vermicelli",
+    "summer rolls",
+    "rice paper rolls"
+   ],
+   "strong": [
+    "vietnamese"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "thai"
+   ]
+  },
+  {
+   "terms": [
+    "pad thai",
+    "green curry",
+    "red curry",
+    "massaman",
+    "panang",
+    "tom yum",
+    "tom kha",
+    "som tam",
+    "papaya salad",
+    "pad see ew",
+    "pad kra pao",
+    "mango sticky rice"
+   ],
+   "strong": [
+    "thai"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "laotian"
+   ]
+  },
+  {
+   "terms": [
+    "dim sum",
+    "yum cha",
+    "har gow",
+    "siu mai",
+    "shumai",
+    "cheung fun",
+    "char siu bao"
+   ],
+   "strong": [
+    "dim_sum",
+    "cantonese",
+    "hong_kong",
+    "chinese"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "malaysian_chinese",
+    "taiwanese"
+   ]
+  },
+  {
+   "terms": [
+    "dumpling",
+    "dumplings",
+    "jiaozi",
+    "potstickers",
+    "wonton",
+    "wontons"
+   ],
+   "strong": [
+    "chinese",
+    "dumpling",
+    "dumplings",
+    "dim_sum",
+    "cantonese",
+    "taiwanese",
+    "sichuan"
+   ],
+   "weak": [
+    "japanese",
+    "korean",
+    "nepalese",
+    "asian",
+    "pan_asian",
+    "georgian",
+    "polish",
+    "russian"
+   ]
+  },
+  {
+   "terms": [
+    "xiaolongbao",
+    "xiao long bao",
+    "soup dumplings",
+    "xlb"
+   ],
+   "strong": [
+    "shanghainese",
+    "taiwanese",
+    "dumpling",
+    "dumplings"
+   ],
+   "weak": [
+    "chinese",
+    "dim_sum"
+   ]
+  },
+  {
+   "terms": [
+    "bao",
+    "bao bun",
+    "bao buns",
+    "gua bao"
+   ],
+   "strong": [
+    "taiwanese",
+    "bao"
+   ],
+   "weak": [
+    "chinese",
+    "asian",
+    "pan_asian",
+    "dim_sum",
+    "japanese",
+    "korean"
+   ]
+  },
+  {
+   "terms": [
+    "peking duck",
+    "roast duck",
+    "char siu",
+    "crispy duck",
+    "siu yuk"
+   ],
+   "strong": [
+    "chinese",
+    "cantonese",
+    "hong_kong"
+   ],
+   "weak": [
+    "asian"
+   ]
+  },
+  {
+   "terms": [
+    "hot pot",
+    "hotpot",
+    "malatang"
+   ],
+   "strong": [
+    "hot_pot",
+    "sichuan",
+    "chinese"
+   ],
+   "weak": [
+    "asian"
+   ]
+  },
+  {
+   "terms": [
+    "mapo tofu",
+    "kung pao",
+    "dan dan",
+    "dan dan noodles",
+    "sichuan peppercorn",
+    "chongqing"
+   ],
+   "strong": [
+    "sichuan",
+    "szechuan"
+   ],
+   "weak": [
+    "chinese"
+   ]
+  },
+  {
+   "terms": [
+    "noodles",
+    "noodle",
+    "hand pulled noodles",
+    "biang biang",
+    "lanzhou",
+    "chow mein",
+    "lo mein",
+    "ho fun"
+   ],
+   "strong": [
+    "chinese",
+    "noodle",
+    "noodles",
+    "ramen",
+    "japanese",
+    "vietnamese",
+    "thai"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "malaysian",
+    "korean"
+   ]
+  },
+  {
+   "terms": [
+    "fried rice",
+    "egg fried rice",
+    "sweet and sour",
+    "spring rolls",
+    "spring roll",
+    "crispy chilli beef",
+    "salt and pepper",
+    "congee"
+   ],
+   "strong": [
+    "chinese",
+    "cantonese"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "thai",
+    "vietnamese",
+    "malaysian"
+   ]
+  },
+  {
+   "terms": [
+    "bubble tea",
+    "boba",
+    "milk tea"
+   ],
+   "strong": [
+    "bubble_tea",
+    "taiwanese"
+   ],
+   "weak": [
+    "tea",
+    "dessert",
+    "asian"
+   ]
+  },
+  {
+   "terms": [
+    "bibimbap",
+    "bulgogi",
+    "kimchi",
+    "tteokbokki",
+    "japchae",
+    "korean bbq",
+    "kimbap",
+    "sundubu"
+   ],
+   "strong": [
+    "korean",
+    "korean_bbq"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian"
+   ]
+  },
+  {
+   "terms": [
+    "korean fried chicken",
+    "kfc korean",
+    "yangnyeom"
+   ],
+   "strong": [
+    "korean",
+    "korean_fried_chicken"
+   ],
+   "weak": [
+    "chicken",
+    "asian"
+   ]
+  },
+  {
+   "terms": [
+    "laksa",
+    "nasi lemak",
+    "roti canai",
+    "rendang",
+    "satay",
+    "hainanese chicken rice",
+    "char kway teow",
+    "mee goreng",
+    "nasi goreng"
+   ],
+   "strong": [
+    "malaysian",
+    "singaporean",
+    "indonesian"
+   ],
+   "weak": [
+    "asian",
+    "pan_asian",
+    "thai"
+   ]
+  },
+  {
+   "terms": [
+    "adobo",
+    "sisig",
+    "lechon",
+    "halo halo",
+    "lumpia"
+   ],
+   "strong": [
+    "filipino"
+   ],
+   "weak": [
+    "asian"
+   ]
+  },
+  {
+   "terms": [
+    "poke",
+    "poké",
+    "poke bowl"
+   ],
+   "strong": [
+    "poke",
+    "hawaiian"
+   ],
+   "weak": [
+    "sushi",
+    "japanese",
+    "salad",
+    "healthy"
+   ]
+  },
+  {
+   "terms": [
+    "taco",
+    "tacos",
+    "al pastor",
+    "carnitas",
+    "birria"
+   ],
+   "strong": [
+    "mexican",
+    "tex-mex",
+    "taco",
+    "tacos",
+    "taqueria"
+   ],
+   "weak": [
+    "latin_american",
+    "american"
+   ]
+  },
+  {
+   "terms": [
+    "burrito",
+    "burritos",
+    "burrito bowl",
+    "quesadilla",
+    "quesadillas",
+    "nachos",
+    "enchilada",
+    "enchiladas",
+    "fajita",
+    "fajitas",
+    "chimichanga",
+    "guacamole"
+   ],
+   "strong": [
+    "mexican",
+    "tex-mex",
+    "burrito",
+    "burritos"
+   ],
+   "weak": [
+    "latin_american",
+    "american"
+   ]
+  },
+  {
+   "terms": [
+    "tamales",
+    "tamale",
+    "elote",
+    "mole",
+    "pozole",
+    "tostada",
+    "tostadas"
+   ],
+   "strong": [
+    "mexican"
+   ],
+   "weak": [
+    "latin_american"
+   ]
+  },
+  {
+   "terms": [
+    "churros",
+    "churro"
+   ],
+   "strong": [
+    "mexican",
+    "spanish",
+    "churros"
+   ],
+   "weak": [
+    "dessert",
+    "latin_american"
+   ]
+  },
+  {
+   "terms": [
+    "margarita",
+    "mezcal",
+    "tequila"
+   ],
+   "strong": [
+    "mexican",
+    "tex-mex",
+    "cocktail"
+   ],
+   "weak": [
+    "bar",
+    "latin_american"
+   ]
+  },
+  {
+   "terms": [
+    "ceviche",
+    "lomo saltado",
+    "pisco sour"
+   ],
+   "strong": [
+    "peruvian"
+   ],
+   "weak": [
+    "latin_american",
+    "seafood"
+   ]
+  },
+  {
+   "terms": [
+    "empanada",
+    "empanadas"
+   ],
+   "strong": [
+    "argentinian",
+    "colombian",
+    "latin_american",
+    "chilean"
+   ],
+   "weak": [
+    "spanish",
+    "venezuelan",
+    "peruvian"
+   ]
+  },
+  {
+   "terms": [
+    "arepa",
+    "arepas"
+   ],
+   "strong": [
+    "venezuelan",
+    "colombian"
+   ],
+   "weak": [
+    "latin_american"
+   ]
+  },
+  {
+   "terms": [
+    "feijoada",
+    "pao de queijo",
+    "acai",
+    "açaí",
+    "acai bowl"
+   ],
+   "strong": [
+    "brazilian",
+    "acai",
+    "juice"
+   ],
+   "weak": [
+    "latin_american",
+    "healthy",
+    "breakfast"
+   ]
+  },
+  {
+   "terms": [
+    "pizza",
+    "margherita",
+    "pepperoni",
+    "neapolitan pizza",
+    "calzone"
+   ],
+   "strong": [
+    "pizza",
+    "italian_pizza",
+    "italian"
+   ],
+   "weak": [
+    "american",
+    "turkish",
+    "mediterranean"
+   ]
+  },
+  {
+   "terms": [
+    "pasta",
+    "spaghetti",
+    "carbonara",
+    "lasagne",
+    "lasagna",
+    "bolognese",
+    "ravioli",
+    "gnocchi",
+    "pappardelle",
+    "tagliatelle",
+    "cacio e pepe",
+    "linguine",
+    "penne",
+    "arrabbiata"
+   ],
+   "strong": [
+    "italian",
+    "pasta"
+   ],
+   "weak": [
+    "mediterranean",
+    "pizza",
+    "european",
+    "french"
+   ]
+  },
+  {
+   "terms": [
+    "risotto",
+    "arancini",
+    "focaccia",
+    "bruschetta",
+    "burrata",
+    "antipasti",
+    "osso buco",
+    "panini",
+    "piadina"
+   ],
+   "strong": [
+    "italian"
+   ],
+   "weak": [
+    "mediterranean",
+    "pizza",
+    "deli"
+   ]
+  },
+  {
+   "terms": [
+    "tiramisu",
+    "cannoli",
+    "panna cotta"
+   ],
+   "strong": [
+    "italian"
+   ],
+   "weak": [
+    "dessert",
+    "pizza"
+   ]
+  },
+  {
+   "terms": [
+    "gelato"
+   ],
+   "strong": [
+    "gelato",
+    "ice_cream",
+    "italian"
+   ],
+   "weak": [
+    "dessert"
+   ]
+  },
+  {
+   "terms": [
+    "burger",
+    "burgers",
+    "cheeseburger",
+    "smash burger"
+   ],
+   "strong": [
+    "burger",
+    "american"
+   ],
+   "weak": [
+    "pub",
+    "chicken",
+    "diner",
+    "steak_house",
+    "grill",
+    "british"
+   ]
+  },
+  {
+   "terms": [
+    "hot dog",
+    "hot dogs"
+   ],
+   "strong": [
+    "hot_dog",
+    "american"
+   ],
+   "weak": [
+    "burger",
+    "diner"
+   ]
+  },
+  {
+   "terms": [
+    "wings",
+    "chicken wings",
+    "buffalo wings"
+   ],
+   "strong": [
+    "wings",
+    "chicken",
+    "american"
+   ],
+   "weak": [
+    "burger",
+    "korean",
+    "bar",
+    "pub"
+   ]
+  },
+  {
+   "terms": [
+    "fried chicken",
+    "chicken burger",
+    "chicken strips",
+    "tenders"
+   ],
+   "strong": [
+    "chicken",
+    "fried_chicken",
+    "korean_fried_chicken",
+    "american"
+   ],
+   "weak": [
+    "burger"
+   ]
+  },
+  {
+   "terms": [
+    "peri peri",
+    "piri piri",
+    "peri-peri"
+   ],
+   "strong": [
+    "peri_peri",
+    "portuguese",
+    "chicken"
+   ],
+   "weak": [
+    "grill"
+   ]
+  },
+  {
+   "terms": [
+    "ribs",
+    "brisket",
+    "pulled pork",
+    "smokehouse",
+    "bbq ribs"
+   ],
+   "strong": [
+    "barbecue",
+    "bbq",
+    "american",
+    "smokehouse"
+   ],
+   "weak": [
+    "steak_house",
+    "grill",
+    "korean_bbq"
+   ]
+  },
+  {
+   "terms": [
+    "mac and cheese",
+    "mac n cheese",
+    "milkshake",
+    "milkshakes",
+    "pancakes",
+    "waffles",
+    "waffle"
+   ],
+   "strong": [
+    "american",
+    "diner",
+    "breakfast",
+    "brunch",
+    "dessert",
+    "waffle"
+   ],
+   "weak": [
+    "burger",
+    "cafe"
+   ]
+  },
+  {
+   "terms": [
+    "steak",
+    "ribeye",
+    "sirloin",
+    "fillet steak",
+    "tomahawk"
+   ],
+   "strong": [
+    "steak_house",
+    "steak",
+    "argentinian",
+    "grill"
+   ],
+   "weak": [
+    "british",
+    "american",
+    "pub",
+    "french",
+    "brazilian"
+   ]
+  },
+  {
+   "terms": [
+    "fish and chips",
+    "fish & chips",
+    "chippy",
+    "battered cod",
+    "chips"
+   ],
+   "strong": [
+    "fish_and_chips"
+   ],
+   "weak": [
+    "british",
+    "pub",
+    "seafood",
+    "english"
+   ]
+  },
+  {
+   "terms": [
+    "pie and mash",
+    "pie",
+    "pies",
+    "pie & mash",
+    "jellied eels",
+    "sausage roll",
+    "scotch egg",
+    "pasty"
+   ],
+   "strong": [
+    "british",
+    "pie",
+    "english",
+    "bakery"
+   ],
+   "weak": [
+    "pub",
+    "regional"
+   ]
+  },
+  {
+   "terms": [
+    "sunday roast",
+    "roast dinner",
+    "yorkshire pudding",
+    "full english",
+    "fry up",
+    "english breakfast",
+    "beans on toast"
+   ],
+   "strong": [
+    "british",
+    "english",
+    "breakfast"
+   ],
+   "weak": [
+    "pub",
+    "cafe",
+    "brunch"
+   ]
+  },
+  {
+   "terms": [
+    "eggs benedict",
+    "avocado toast",
+    "shakshuka",
+    "granola",
+    "brunch"
+   ],
+   "strong": [
+    "brunch",
+    "breakfast"
+   ],
+   "weak": [
+    "cafe",
+    "coffee_shop",
+    "australian",
+    "israeli",
+    "middle_eastern"
+   ]
+  },
+  {
+   "terms": [
+    "oysters",
+    "oyster",
+    "lobster",
+    "crab",
+    "mussels",
+    "prawns",
+    "scallops",
+    "seafood"
+   ],
+   "strong": [
+    "seafood",
+    "fish",
+    "oyster"
+   ],
+   "weak": [
+    "french",
+    "spanish",
+    "british",
+    "portuguese"
+   ]
+  },
+  {
+   "terms": [
+    "kebab",
+    "doner",
+    "döner",
+    "shish",
+    "adana",
+    "iskender"
+   ],
+   "strong": [
+    "kebab",
+    "turkish",
+    "turkish_grill",
+    "ocakbasi"
+   ],
+   "weak": [
+    "middle_eastern",
+    "persian",
+    "greek",
+    "lebanese",
+    "kurdish"
+   ]
+  },
+  {
+   "terms": [
+    "shawarma",
+    "manakish",
+    "manoushe",
+    "fattoush",
+    "tabbouleh",
+    "kibbeh"
+   ],
+   "strong": [
+    "lebanese",
+    "syrian",
+    "middle_eastern",
+    "shawarma",
+    "arab"
+   ],
+   "weak": [
+    "turkish",
+    "mediterranean",
+    "israeli"
+   ]
+  },
+  {
+   "terms": [
+    "falafel",
+    "hummus",
+    "houmous",
+    "mezze",
+    "meze",
+    "baba ganoush"
+   ],
+   "strong": [
+    "falafel",
+    "lebanese",
+    "middle_eastern",
+    "israeli",
+    "syrian",
+    "palestinian"
+   ],
+   "weak": [
+    "turkish",
+    "greek",
+    "mediterranean",
+    "vegan",
+    "vegetarian"
+   ]
+  },
+  {
+   "terms": [
+    "sabich",
+    "schnitzel pita",
+    "pita",
+    "pitta"
+   ],
+   "strong": [
+    "israeli",
+    "middle_eastern",
+    "greek"
+   ],
+   "weak": [
+    "lebanese",
+    "mediterranean"
+   ]
+  },
+  {
+   "terms": [
+    "gyros",
+    "souvlaki",
+    "moussaka",
+    "spanakopita",
+    "halloumi",
+    "tzatziki",
+    "baklava"
+   ],
+   "strong": [
+    "greek",
+    "cypriot",
+    "gyros",
+    "souvlaki"
+   ],
+   "weak": [
+    "turkish",
+    "lebanese",
+    "mediterranean",
+    "middle_eastern"
+   ]
+  },
+  {
+   "terms": [
+    "lahmacun",
+    "pide",
+    "gozleme",
+    "gözleme",
+    "simit",
+    "turkish breakfast",
+    "kunefe",
+    "künefe"
+   ],
+   "strong": [
+    "turkish"
+   ],
+   "weak": [
+    "kurdish",
+    "middle_eastern"
+   ]
+  },
+  {
+   "terms": [
+    "tahdig",
+    "kebab koobideh",
+    "joojeh",
+    "ghormeh sabzi"
+   ],
+   "strong": [
+    "persian",
+    "iranian"
+   ],
+   "weak": [
+    "middle_eastern"
+   ]
+  },
+  {
+   "terms": [
+    "tagine",
+    "couscous",
+    "harira"
+   ],
+   "strong": [
+    "moroccan",
+    "north_african",
+    "tunisian",
+    "algerian"
+   ],
+   "weak": [
+    "middle_eastern",
+    "mediterranean",
+    "african"
+   ]
+  },
+  {
+   "terms": [
+    "jerk chicken",
+    "jerk",
+    "curry goat",
+    "oxtail",
+    "ackee",
+    "saltfish",
+    "patty",
+    "patties",
+    "rice and peas",
+    "plantain",
+    "doubles"
+   ],
+   "strong": [
+    "caribbean",
+    "jamaican",
+    "trinidadian"
+   ],
+   "weak": [
+    "african",
+    "west_african"
+   ]
+  },
+  {
+   "terms": [
+    "jollof",
+    "jollof rice",
+    "suya",
+    "egusi",
+    "fufu",
+    "pounded yam",
+    "puff puff"
+   ],
+   "strong": [
+    "nigerian",
+    "ghanaian",
+    "west_african",
+    "african"
+   ],
+   "weak": [
+    "caribbean"
+   ]
+  },
+  {
+   "terms": [
+    "injera",
+    "tibs",
+    "kitfo",
+    "doro wat"
+   ],
+   "strong": [
+    "ethiopian",
+    "eritrean"
+   ],
+   "weak": [
+    "african"
+   ]
+  },
+  {
+   "terms": [
+    "paella",
+    "tapas",
+    "patatas bravas",
+    "croquetas",
+    "tortilla espanola",
+    "jamon",
+    "jamón",
+    "gambas"
+   ],
+   "strong": [
+    "spanish",
+    "tapas"
+   ],
+   "weak": [
+    "mediterranean",
+    "latin_american",
+    "portuguese"
+   ]
+  },
+  {
+   "terms": [
+    "pastel de nata",
+    "pasteis de nata",
+    "custard tart",
+    "bacalhau",
+    "francesinha"
+   ],
+   "strong": [
+    "portuguese"
+   ],
+   "weak": [
+    "bakery",
+    "brazilian"
+   ]
+  },
+  {
+   "terms": [
+    "croissant",
+    "croissants",
+    "pain au chocolat",
+    "viennoiserie",
+    "pastry",
+    "pastries",
+    "danish"
+   ],
+   "strong": [
+    "bakery",
+    "pastry",
+    "french",
+    "patisserie"
+   ],
+   "weak": [
+    "coffee_shop",
+    "cafe",
+    "breakfast"
+   ]
+  },
+  {
+   "terms": [
+    "crepe",
+    "crepes",
+    "crêpe",
+    "galette"
+   ],
+   "strong": [
+    "crepe",
+    "french"
+   ],
+   "weak": [
+    "dessert",
+    "breakfast",
+    "cafe"
+   ]
+  },
+  {
+   "terms": [
+    "macaron",
+    "macarons",
+    "eclair",
+    "éclair",
+    "tarte",
+    "patisserie"
+   ],
+   "strong": [
+    "patisserie",
+    "pastry",
+    "french",
+    "bakery"
+   ],
+   "weak": [
+    "dessert",
+    "cake"
+   ]
+  },
+  {
+   "terms": [
+    "steak frites",
+    "moules",
+    "moules frites",
+    "escargot",
+    "duck confit",
+    "croque monsieur",
+    "french onion soup"
+   ],
+   "strong": [
+    "french",
+    "bistro",
+    "belgian"
+   ],
+   "weak": [
+    "european",
+    "brasserie"
+   ]
+  },
+  {
+   "terms": [
+    "cake",
+    "cakes",
+    "cupcake",
+    "cupcakes",
+    "cheesecake",
+    "brownie",
+    "brownies",
+    "cookie",
+    "cookies",
+    "carrot cake",
+    "banana bread"
+   ],
+   "strong": [
+    "cake",
+    "bakery",
+    "dessert",
+    "pastry"
+   ],
+   "weak": [
+    "coffee_shop",
+    "cafe"
+   ]
+  },
+  {
+   "terms": [
+    "donut",
+    "donuts",
+    "doughnut",
+    "doughnuts"
+   ],
+   "strong": [
+    "donut",
+    "bakery"
+   ],
+   "weak": [
+    "coffee_shop",
+    "dessert",
+    "american"
+   ]
+  },
+  {
+   "terms": [
+    "ice cream",
+    "frozen yogurt",
+    "froyo",
+    "sundae"
+   ],
+   "strong": [
+    "ice_cream",
+    "gelato",
+    "frozen_yogurt",
+    "dessert"
+   ],
+   "weak": [
+    "cafe"
+   ]
+  },
+  {
+   "terms": [
+    "bagel",
+    "bagels",
+    "salt beef",
+    "beigel"
+   ],
+   "strong": [
+    "bagel",
+    "jewish",
+    "deli"
+   ],
+   "weak": [
+    "bakery",
+    "sandwich",
+    "cafe"
+   ]
+  },
+  {
+   "terms": [
+    "sandwich",
+    "sandwiches",
+    "sub",
+    "toastie",
+    "toasties",
+    "wrap",
+    "wraps",
+    "deli"
+   ],
+   "strong": [
+    "sandwich",
+    "deli",
+    "bagel"
+   ],
+   "weak": [
+    "cafe",
+    "coffee_shop",
+    "bakery"
+   ]
+  },
+  {
+   "terms": [
+    "salad",
+    "salads",
+    "grain bowl",
+    "buddha bowl"
+   ],
+   "strong": [
+    "salad",
+    "healthy",
+    "poke"
+   ],
+   "weak": [
+    "cafe",
+    "sandwich",
+    "vegan",
+    "mediterranean"
+   ]
+  },
+  {
+   "terms": [
+    "smoothie",
+    "smoothies",
+    "juice",
+    "juices",
+    "cold pressed"
+   ],
+   "strong": [
+    "juice",
+    "smoothie"
+   ],
+   "weak": [
+    "cafe",
+    "healthy",
+    "coffee_shop"
+   ]
+  },
+  {
+   "terms": [
+    "coffee",
+    "flat white",
+    "latte",
+    "cappuccino",
+    "espresso",
+    "cortado"
+   ],
+   "strong": [
+    "coffee_shop",
+    "coffee"
+   ],
+   "weak": [
+    "cafe",
+    "bakery"
+   ]
+  },
+  {
+   "terms": [
+    "tea",
+    "afternoon tea",
+    "cream tea",
+    "scones",
+    "scone"
+   ],
+   "strong": [
+    "tea",
+    "afternoon_tea"
+   ],
+   "weak": [
+    "cafe",
+    "british",
+    "bakery",
+    "coffee_shop"
+   ]
+  },
+  {
+   "terms": [
+    "pierogi",
+    "pierogies",
+    "borscht",
+    "blini",
+    "pelmeni",
+    "khachapuri",
+    "khinkali"
+   ],
+   "strong": [
+    "polish",
+    "russian",
+    "ukrainian",
+    "georgian"
+   ],
+   "weak": [
+    "european"
+   ]
+  },
+  {
+   "terms": [
+    "schnitzel",
+    "bratwurst",
+    "currywurst",
+    "pretzel"
+   ],
+   "strong": [
+    "german",
+    "austrian"
+   ],
+   "weak": [
+    "european"
+   ]
+  },
+  {
+   "terms": [
+    "vegan"
+   ],
+   "strong": [
+    "vegan"
+   ],
+   "weak": [
+    "vegetarian",
+    "healthy",
+    "salad",
+    "indian",
+    "ethiopian",
+    "middle_eastern"
+   ]
+  },
+  {
+   "terms": [
+    "vegetarian",
+    "veggie"
+   ],
+   "strong": [
+    "vegetarian",
+    "vegan"
+   ],
+   "weak": [
+    "indian",
+    "south_indian",
+    "healthy",
+    "salad",
+    "middle_eastern"
+   ]
+  },
+  {
+   "terms": [
+    "halal"
+   ],
+   "strong": [
+    "pakistani",
+    "turkish",
+    "lebanese",
+    "middle_eastern",
+    "bangladeshi",
+    "kebab"
+   ],
+   "weak": [
+    "indian",
+    "chicken",
+    "persian"
+   ]
+  }
+ ],
+ "nameHints": [
+  [
+   "\\b(taco|tacos|taqueria|burrito|burritos|cantina|mexican|mexicana|mexicano|tortilla|chilango|wahaca|guac)\\b",
+   "mexican"
+  ],
+  [
+   "\\b(sushi|sashimi|izakaya|katsu|bento|yakitori|teppan|japan|japanese|tokyo|osaka|kyoto|sake)\\b",
+   "japanese"
+  ],
+  [
+   "\\b(ramen|ramen-ya|tonkotsu)\\b",
+   "ramen"
+  ],
+  [
+   "\\budon\\b",
+   "udon"
+  ],
+  [
+   "\\b(pho|viet|vietnam|vietnamese|banh|saigon|hanoi)\\b",
+   "vietnamese"
+  ],
+  [
+   "\\b(thai|thailand|bangkok|siam)\\b",
+   "thai"
+  ],
+  [
+   "\\b(dim sum|yum cha|dumpling|dumplings|wonton|noodle bar|wok|canton|cantonese|sichuan|szechuan|hunan|peking|beijing|shanghai|hong kong|chinese|china|chopstix)\\b",
+   "chinese"
+  ],
+  [
+   "\\b(korean|korea|seoul|bibimbap|kimchi|bab)\\b",
+   "korean"
+  ],
+  [
+   "\\b(curry|tandoor|tandoori|masala|tikka|balti|biryani|bombay|mumbai|delhi|madras|chennai|kerala|punjab|punjabi|india|indian|raj|mahal|bengal|dhaka|karachi|lahore|dosa|bhavan)\\b",
+   "indian"
+  ],
+  [
+   "\\b(dosa|chennai|kerala|madras|sagar|bhavan|udupi|tamil)\\b",
+   "south_indian"
+  ],
+  [
+   "\\b(sri lanka|sri lankan|ceylon|colombo|hoppers|kolamba)\\b",
+   "sri_lankan"
+  ],
+  [
+   "\\b(nepal|nepalese|himalaya|himalayan|gurkha|everest|momo)\\b",
+   "nepalese"
+  ],
+  [
+   "\\b(pizza|pizzeria|pizzas)\\b",
+   "pizza"
+  ],
+  [
+   "\\b(trattoria|osteria|ristorante|pasta|pastificio|italia|italian|bella|nonna)\\b",
+   "italian"
+  ],
+  [
+   "\\b(kebab|kebabs|doner|grill house|ocakbasi|mangal|turkish|istanbul|anatolia|efes)\\b",
+   "turkish"
+  ],
+  [
+   "\\b(shawarma|falafel|lebanese|beirut|lebanon|mezze|meze|damascus|syrian)\\b",
+   "lebanese"
+  ],
+  [
+   "\\b(greek|souvlaki|gyros|taverna|athens|cyprus|cypriot)\\b",
+   "greek"
+  ],
+  [
+   "\\b(persian|iran|tehran|shiraz)\\b",
+   "persian"
+  ],
+  [
+   "\\b(jerk|caribbean|jamaica|jamaican|trini)\\b",
+   "caribbean"
+  ],
+  [
+   "\\b(jollof|nigerian|naija|ghana|african|suya)\\b",
+   "african"
+  ],
+  [
+   "\\b(ethiopian|eritrean|habesha|addis)\\b",
+   "ethiopian"
+  ],
+  [
+   "\\b(tapas|spanish|bodega|iberica|ibérica)\\b",
+   "spanish"
+  ],
+  [
+   "\\b(peri|nando|nando's)\\b",
+   "peri_peri"
+  ],
+  [
+   "\\b(burger|burgers|smash)\\b",
+   "burger"
+  ],
+  [
+   "\\b(chicken|wings|fried chicken|cluckin)\\b",
+   "chicken"
+  ],
+  [
+   "\\b(fish bar|chippy|fish & chips|fish and chips|frying)\\b",
+   "fish_and_chips"
+  ],
+  [
+   "\\b(bakery|bakehouse|boulangerie|patisserie|pâtisserie|baker|bake)\\b",
+   "bakery"
+  ],
+  [
+   "\\b(bagel|beigel)\\b",
+   "bagel"
+  ],
+  [
+   "\\b(gelato|gelateria|ice cream)\\b",
+   "ice_cream"
+  ],
+  [
+   "\\b(boba|bubble tea|milk tea)\\b",
+   "bubble_tea"
+  ],
+  [
+   "\\b(steak|steakhouse)\\b",
+   "steak_house"
+  ],
+  [
+   "\\b(poke|poké)\\b",
+   "poke"
+  ],
+  [
+   "\\b(crepe|crêpe|creperie)\\b",
+   "crepe"
+  ],
+  [
+   "\\b(bbq|barbecue|smokehouse)\\b",
+   "barbecue"
+  ],
+  [
+   "\\b(malaysian|malaysia|singapore|laksa|roti king)\\b",
+   "malaysian"
+  ],
+  [
+   "\\b(peruvian|peru|ceviche)\\b",
+   "peruvian"
+  ],
+  [
+   "\\b(brazil|brazilian|churrascaria)\\b",
+   "brazilian"
+  ],
+  [
+   "\\b(vegan|plant based|plant-based)\\b",
+   "vegan"
+  ],
+  [
+   "\\b(oriental|orient|asia|asian|pan asian)\\b",
+   "asian"
+  ],
+  [
+   "\\b(international|world foods?|continental|global|euro|european)\\b",
+   "international"
+  ],
+  [
+   "\\b(polski|polska|polish)\\b",
+   "polish"
+  ],
+  [
+   "\\b(romanian|romania)\\b",
+   "romanian"
+  ],
+  [
+   "\\b(halal)\\b",
+   "halal"
+  ],
+  [
+   "\\b(bengali|bangla|bangladesh)\\b",
+   "bangladeshi"
+  ],
+  [
+   "\\b(turkish|türk|turk)\\b",
+   "turkish"
+  ],
+  [
+   "\\b(african|afro)\\b",
+   "african"
+  ]
+ ],
+ "chains": {
+  "taco bell": {
+   "cuisines": [
+    "mexican",
+    "tex-mex"
+   ],
+   "dishes": [
+    "taco",
+    "burrito",
+    "quesadilla",
+    "nachos"
+   ]
+  },
+  "chipotle": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "burrito",
+    "burrito bowl",
+    "taco",
+    "quesadilla",
+    "guacamole"
+   ]
+  },
+  "tortilla": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "burrito",
+    "taco",
+    "quesadilla",
+    "nachos"
+   ]
+  },
+  "chilango": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "burrito",
+    "taco"
+   ]
+  },
+  "barburrito": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "burrito",
+    "taco"
+   ]
+  },
+  "wahaca": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "taco",
+    "quesadilla",
+    "churros",
+    "margarita"
+   ]
+  },
+  "poncho 8": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "burrito",
+    "taco"
+   ]
+  },
+  "benito's hat": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "burrito",
+    "taco"
+   ]
+  },
+  "el pastor": {
+   "cuisines": [
+    "mexican"
+   ],
+   "dishes": [
+    "taco",
+    "al pastor"
+   ]
+  },
+  "dishoom": {
+   "cuisines": [
+    "indian"
+   ],
+   "dishes": [
+    "lassi",
+    "biryani",
+    "naan",
+    "paneer",
+    "chaat",
+    "dal"
+   ]
+  },
+  "kricket": {
+   "cuisines": [
+    "indian"
+   ],
+   "dishes": [
+    "naan",
+    "chaat"
+   ]
+  },
+  "masala zone": {
+   "cuisines": [
+    "indian"
+   ],
+   "dishes": [
+    "thali",
+    "curry",
+    "biryani",
+    "lassi"
+   ]
+  },
+  "mowgli": {
+   "cuisines": [
+    "indian",
+    "indian_street_food"
+   ],
+   "dishes": [
+    "chaat",
+    "curry",
+    "lassi"
+   ]
+  },
+  "hoppers": {
+   "cuisines": [
+    "sri_lankan"
+   ],
+   "dishes": [
+    "dosa",
+    "hoppers",
+    "kottu",
+    "curry"
+   ]
+  },
+  "saravanaa bhavan": {
+   "cuisines": [
+    "south_indian",
+    "vegetarian"
+   ],
+   "dishes": [
+    "dosa",
+    "idli",
+    "vada",
+    "thali",
+    "lassi"
+   ]
+  },
+  "sagar": {
+   "cuisines": [
+    "south_indian",
+    "vegetarian"
+   ],
+   "dishes": [
+    "dosa",
+    "idli",
+    "vada",
+    "thali"
+   ]
+  },
+  "chennai dosa": {
+   "cuisines": [
+    "south_indian"
+   ],
+   "dishes": [
+    "dosa",
+    "idli",
+    "vada"
+   ]
+  },
+  "dosa": {
+   "cuisines": [
+    "south_indian"
+   ],
+   "dishes": [
+    "dosa"
+   ]
+  },
+  "tayyabs": {
+   "cuisines": [
+    "pakistani",
+    "punjabi"
+   ],
+   "dishes": [
+    "lassi",
+    "naan",
+    "tikka",
+    "curry"
+   ]
+  },
+  "lahore kebab house": {
+   "cuisines": [
+    "pakistani"
+   ],
+   "dishes": [
+    "lassi",
+    "naan",
+    "tikka",
+    "curry",
+    "kebab"
+   ]
+  },
+  "itsu": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": [
+    "sushi",
+    "gyoza",
+    "dumplings",
+    "noodles",
+    "poke"
+   ]
+  },
+  "wasabi": {
+   "cuisines": [
+    "japanese"
+   ],
+   "dishes": [
+    "sushi",
+    "katsu",
+    "katsu curry",
+    "bento",
+    "teriyaki"
+   ]
+  },
+  "wagamama": {
+   "cuisines": [
+    "japanese",
+    "pan_asian"
+   ],
+   "dishes": [
+    "ramen",
+    "katsu",
+    "katsu curry",
+    "gyoza",
+    "udon",
+    "noodles",
+    "bao",
+    "teriyaki"
+   ]
+  },
+  "yo! sushi": {
+   "cuisines": [
+    "japanese",
+    "sushi"
+   ],
+   "dishes": [
+    "sushi",
+    "ramen",
+    "katsu",
+    "gyoza"
+   ]
+  },
+  "yo sushi": {
+   "cuisines": [
+    "japanese",
+    "sushi"
+   ],
+   "dishes": [
+    "sushi",
+    "ramen",
+    "katsu",
+    "gyoza"
+   ]
+  },
+  "sushi shop": {
+   "cuisines": [
+    "japanese",
+    "sushi"
+   ],
+   "dishes": [
+    "sushi"
+   ]
+  },
+  "kanada-ya": {
+   "cuisines": [
+    "ramen",
+    "japanese"
+   ],
+   "dishes": [
+    "ramen",
+    "gyoza"
+   ]
+  },
+  "shoryu": {
+   "cuisines": [
+    "ramen",
+    "japanese"
+   ],
+   "dishes": [
+    "ramen",
+    "gyoza",
+    "bao"
+   ]
+  },
+  "bone daddies": {
+   "cuisines": [
+    "ramen",
+    "japanese"
+   ],
+   "dishes": [
+    "ramen"
+   ]
+  },
+  "tonkotsu": {
+   "cuisines": [
+    "ramen",
+    "japanese"
+   ],
+   "dishes": [
+    "ramen",
+    "gyoza"
+   ]
+  },
+  "ippudo": {
+   "cuisines": [
+    "ramen",
+    "japanese"
+   ],
+   "dishes": [
+    "ramen",
+    "bao",
+    "gyoza"
+   ]
+  },
+  "koya": {
+   "cuisines": [
+    "japanese",
+    "udon"
+   ],
+   "dishes": [
+    "udon"
+   ]
+  },
+  "sticks'n'sushi": {
+   "cuisines": [
+    "japanese",
+    "sushi"
+   ],
+   "dishes": [
+    "sushi",
+    "yakitori"
+   ]
+  },
+  "sticks n sushi": {
+   "cuisines": [
+    "japanese",
+    "sushi"
+   ],
+   "dishes": [
+    "sushi",
+    "yakitori"
+   ]
+  },
+  "kokoro": {
+   "cuisines": [
+    "japanese",
+    "korean"
+   ],
+   "dishes": [
+    "sushi",
+    "katsu",
+    "bento",
+    "bibimbap",
+    "katsu curry"
+   ]
+  },
+  "abokado": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": [
+    "sushi",
+    "katsu",
+    "wrap"
+   ]
+  },
+  "ping pong": {
+   "cuisines": [
+    "chinese",
+    "dim_sum"
+   ],
+   "dishes": [
+    "dim sum",
+    "dumplings"
+   ]
+  },
+  "yauatcha": {
+   "cuisines": [
+    "cantonese",
+    "dim_sum"
+   ],
+   "dishes": [
+    "dim sum",
+    "dumplings"
+   ]
+  },
+  "dim sum library": {
+   "cuisines": [
+    "chinese",
+    "dim_sum"
+   ],
+   "dishes": [
+    "dim sum",
+    "dumplings"
+   ]
+  },
+  "royal china": {
+   "cuisines": [
+    "cantonese",
+    "dim_sum"
+   ],
+   "dishes": [
+    "dim sum",
+    "peking duck"
+   ]
+  },
+  "dumplings' legend": {
+   "cuisines": [
+    "chinese",
+    "dim_sum"
+   ],
+   "dishes": [
+    "dim sum",
+    "xiaolongbao",
+    "dumplings"
+   ]
+  },
+  "din tai fung": {
+   "cuisines": [
+    "taiwanese",
+    "chinese"
+   ],
+   "dishes": [
+    "xiaolongbao",
+    "dumplings",
+    "wonton",
+    "noodles"
+   ]
+  },
+  "dumpling shack": {
+   "cuisines": [
+    "chinese"
+   ],
+   "dishes": [
+    "dumplings",
+    "xiaolongbao",
+    "noodles"
+   ]
+  },
+  "chopstix": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": [
+    "noodles",
+    "fried rice",
+    "sweet and sour"
+   ]
+  },
+  "leon": {
+   "cuisines": [
+    "mediterranean",
+    "healthy"
+   ],
+   "dishes": [
+    "salad",
+    "falafel",
+    "wrap"
+   ]
+  },
+  "pret": {
+   "cuisines": [
+    "sandwich",
+    "coffee_shop"
+   ],
+   "dishes": [
+    "sandwich",
+    "croissant",
+    "coffee",
+    "salad",
+    "wrap",
+    "soup"
+   ]
+  },
+  "pret a manger": {
+   "cuisines": [
+    "sandwich",
+    "coffee_shop"
+   ],
+   "dishes": [
+    "sandwich",
+    "croissant",
+    "coffee",
+    "salad",
+    "wrap"
+   ]
+  },
+  "greggs": {
+   "cuisines": [
+    "bakery"
+   ],
+   "dishes": [
+    "sausage roll",
+    "pasty",
+    "donut",
+    "coffee",
+    "sandwich"
+   ]
+  },
+  "gail's": {
+   "cuisines": [
+    "bakery"
+   ],
+   "dishes": [
+    "croissant",
+    "pastry",
+    "coffee",
+    "sandwich",
+    "cake"
+   ]
+  },
+  "ole & steen": {
+   "cuisines": [
+    "bakery",
+    "danish"
+   ],
+   "dishes": [
+    "pastry",
+    "danish",
+    "coffee",
+    "cake"
+   ]
+  },
+  "nando's": {
+   "cuisines": [
+    "peri_peri",
+    "portuguese",
+    "chicken"
+   ],
+   "dishes": [
+    "peri peri",
+    "chicken",
+    "wings",
+    "chicken burger"
+   ]
+  },
+  "nandos": {
+   "cuisines": [
+    "peri_peri",
+    "portuguese",
+    "chicken"
+   ],
+   "dishes": [
+    "peri peri",
+    "chicken",
+    "wings"
+   ]
+  },
+  "kfc": {
+   "cuisines": [
+    "chicken",
+    "american"
+   ],
+   "dishes": [
+    "fried chicken",
+    "chicken burger",
+    "wings"
+   ]
+  },
+  "popeyes": {
+   "cuisines": [
+    "chicken",
+    "american"
+   ],
+   "dishes": [
+    "fried chicken",
+    "chicken burger",
+    "wings"
+   ]
+  },
+  "wingstop": {
+   "cuisines": [
+    "chicken",
+    "american"
+   ],
+   "dishes": [
+    "wings",
+    "chicken wings"
+   ]
+  },
+  "five guys": {
+   "cuisines": [
+    "burger",
+    "american"
+   ],
+   "dishes": [
+    "burger",
+    "hot dog",
+    "milkshake",
+    "chips"
+   ]
+  },
+  "shake shack": {
+   "cuisines": [
+    "burger",
+    "american"
+   ],
+   "dishes": [
+    "burger",
+    "milkshake",
+    "hot dog"
+   ]
+  },
+  "honest burgers": {
+   "cuisines": [
+    "burger"
+   ],
+   "dishes": [
+    "burger"
+   ]
+  },
+  "byron": {
+   "cuisines": [
+    "burger"
+   ],
+   "dishes": [
+    "burger",
+    "milkshake"
+   ]
+  },
+  "mcdonald's": {
+   "cuisines": [
+    "burger",
+    "american"
+   ],
+   "dishes": [
+    "burger",
+    "milkshake",
+    "chicken burger",
+    "coffee"
+   ]
+  },
+  "burger king": {
+   "cuisines": [
+    "burger",
+    "american"
+   ],
+   "dishes": [
+    "burger",
+    "chicken burger"
+   ]
+  },
+  "flat iron": {
+   "cuisines": [
+    "steak_house"
+   ],
+   "dishes": [
+    "steak"
+   ]
+  },
+  "hawksmoor": {
+   "cuisines": [
+    "steak_house",
+    "british"
+   ],
+   "dishes": [
+    "steak",
+    "sunday roast"
+   ]
+  },
+  "goodman": {
+   "cuisines": [
+    "steak_house"
+   ],
+   "dishes": [
+    "steak"
+   ]
+  },
+  "rosa's thai": {
+   "cuisines": [
+    "thai"
+   ],
+   "dishes": [
+    "pad thai",
+    "green curry",
+    "massaman",
+    "tom yum"
+   ]
+  },
+  "busaba": {
+   "cuisines": [
+    "thai"
+   ],
+   "dishes": [
+    "pad thai",
+    "green curry"
+   ]
+  },
+  "giggling squid": {
+   "cuisines": [
+    "thai"
+   ],
+   "dishes": [
+    "pad thai",
+    "green curry"
+   ]
+  },
+  "pho": {
+   "cuisines": [
+    "vietnamese"
+   ],
+   "dishes": [
+    "pho",
+    "banh mi",
+    "summer rolls",
+    "bun cha"
+   ]
+  },
+  "banh mi": {
+   "cuisines": [
+    "vietnamese"
+   ],
+   "dishes": [
+    "banh mi"
+   ]
+  },
+  "franco manca": {
+   "cuisines": [
+    "pizza",
+    "italian"
+   ],
+   "dishes": [
+    "pizza"
+   ]
+  },
+  "pizza express": {
+   "cuisines": [
+    "pizza",
+    "italian"
+   ],
+   "dishes": [
+    "pizza",
+    "pasta",
+    "dough balls"
+   ]
+  },
+  "pizzaexpress": {
+   "cuisines": [
+    "pizza",
+    "italian"
+   ],
+   "dishes": [
+    "pizza",
+    "pasta"
+   ]
+  },
+  "pizza hut": {
+   "cuisines": [
+    "pizza",
+    "american"
+   ],
+   "dishes": [
+    "pizza",
+    "wings"
+   ]
+  },
+  "domino's": {
+   "cuisines": [
+    "pizza"
+   ],
+   "dishes": [
+    "pizza",
+    "wings"
+   ]
+  },
+  "papa john's": {
+   "cuisines": [
+    "pizza"
+   ],
+   "dishes": [
+    "pizza"
+   ]
+  },
+  "pizza pilgrims": {
+   "cuisines": [
+    "pizza",
+    "italian"
+   ],
+   "dishes": [
+    "pizza"
+   ]
+  },
+  "homeslice": {
+   "cuisines": [
+    "pizza"
+   ],
+   "dishes": [
+    "pizza"
+   ]
+  },
+  "zizzi": {
+   "cuisines": [
+    "italian"
+   ],
+   "dishes": [
+    "pizza",
+    "pasta",
+    "risotto"
+   ]
+  },
+  "prezzo": {
+   "cuisines": [
+    "italian"
+   ],
+   "dishes": [
+    "pizza",
+    "pasta"
+   ]
+  },
+  "ask italian": {
+   "cuisines": [
+    "italian"
+   ],
+   "dishes": [
+    "pizza",
+    "pasta"
+   ]
+  },
+  "bella italia": {
+   "cuisines": [
+    "italian"
+   ],
+   "dishes": [
+    "pizza",
+    "pasta"
+   ]
+  },
+  "padella": {
+   "cuisines": [
+    "italian",
+    "pasta"
+   ],
+   "dishes": [
+    "pasta"
+   ]
+  },
+  "bancone": {
+   "cuisines": [
+    "italian",
+    "pasta"
+   ],
+   "dishes": [
+    "pasta"
+   ]
+  },
+  "côte": {
+   "cuisines": [
+    "french"
+   ],
+   "dishes": [
+    "steak frites",
+    "croque monsieur",
+    "crepe"
+   ]
+  },
+  "cote": {
+   "cuisines": [
+    "french"
+   ],
+   "dishes": [
+    "steak frites",
+    "croque monsieur"
+   ]
+  },
+  "bill's": {
+   "cuisines": [
+    "british",
+    "brunch"
+   ],
+   "dishes": [
+    "full english",
+    "pancakes",
+    "eggs benedict",
+    "burger"
+   ]
+  },
+  "the breakfast club": {
+   "cuisines": [
+    "breakfast",
+    "brunch",
+    "american"
+   ],
+   "dishes": [
+    "pancakes",
+    "full english",
+    "eggs benedict"
+   ]
+  },
+  "bao": {
+   "cuisines": [
+    "taiwanese"
+   ],
+   "dishes": [
+    "bao",
+    "bao bun"
+   ]
+  },
+  "on the bab": {
+   "cuisines": [
+    "korean"
+   ],
+   "dishes": [
+    "bibimbap",
+    "korean fried chicken",
+    "kimbap"
+   ]
+  },
+  "bibimbap": {
+   "cuisines": [
+    "korean"
+   ],
+   "dishes": [
+    "bibimbap"
+   ]
+  },
+  "jinjuu": {
+   "cuisines": [
+    "korean"
+   ],
+   "dishes": [
+    "korean fried chicken",
+    "bibimbap"
+   ]
+  },
+  "bonchon": {
+   "cuisines": [
+    "korean",
+    "korean_fried_chicken"
+   ],
+   "dishes": [
+    "korean fried chicken",
+    "wings"
+   ]
+  },
+  "roti king": {
+   "cuisines": [
+    "malaysian"
+   ],
+   "dishes": [
+    "roti canai",
+    "laksa",
+    "nasi lemak",
+    "curry"
+   ]
+  },
+  "tossed": {
+   "cuisines": [
+    "salad",
+    "healthy"
+   ],
+   "dishes": [
+    "salad",
+    "wrap",
+    "smoothie"
+   ]
+  },
+  "farmer j": {
+   "cuisines": [
+    "healthy",
+    "salad"
+   ],
+   "dishes": [
+    "salad",
+    "grain bowl"
+   ]
+  },
+  "crussh": {
+   "cuisines": [
+    "juice",
+    "healthy"
+   ],
+   "dishes": [
+    "juice",
+    "smoothie",
+    "salad"
+   ]
+  },
+  "joe & the juice": {
+   "cuisines": [
+    "juice",
+    "coffee_shop"
+   ],
+   "dishes": [
+    "juice",
+    "smoothie",
+    "sandwich",
+    "coffee"
+   ]
+  },
+  "starbucks": {
+   "cuisines": [
+    "coffee_shop"
+   ],
+   "dishes": [
+    "coffee",
+    "latte",
+    "matcha latte",
+    "cake",
+    "croissant"
+   ]
+  },
+  "costa": {
+   "cuisines": [
+    "coffee_shop"
+   ],
+   "dishes": [
+    "coffee",
+    "latte",
+    "cake",
+    "toastie"
+   ]
+  },
+  "caffè nero": {
+   "cuisines": [
+    "coffee_shop"
+   ],
+   "dishes": [
+    "coffee",
+    "latte",
+    "croissant",
+    "toastie"
+   ]
+  },
+  "caffe nero": {
+   "cuisines": [
+    "coffee_shop"
+   ],
+   "dishes": [
+    "coffee",
+    "latte",
+    "croissant",
+    "toastie"
+   ]
+  },
+  "black sheep coffee": {
+   "cuisines": [
+    "coffee_shop"
+   ],
+   "dishes": [
+    "coffee",
+    "waffles"
+   ]
+  },
+  "subway": {
+   "cuisines": [
+    "sandwich"
+   ],
+   "dishes": [
+    "sandwich",
+    "sub"
+   ]
+  },
+  "krispy kreme": {
+   "cuisines": [
+    "donut"
+   ],
+   "dishes": [
+    "donut"
+   ]
+  },
+  "chatime": {
+   "cuisines": [
+    "bubble_tea"
+   ],
+   "dishes": [
+    "bubble tea",
+    "milk tea"
+   ]
+  },
+  "gong cha": {
+   "cuisines": [
+    "bubble_tea"
+   ],
+   "dishes": [
+    "bubble tea",
+    "milk tea"
+   ]
+  },
+  "yi fang": {
+   "cuisines": [
+    "bubble_tea",
+    "taiwanese"
+   ],
+   "dishes": [
+    "bubble tea"
+   ]
+  },
+  "tiger sugar": {
+   "cuisines": [
+    "bubble_tea"
+   ],
+   "dishes": [
+    "bubble tea"
+   ]
+  },
+  "comptoir libanais": {
+   "cuisines": [
+    "lebanese"
+   ],
+   "dishes": [
+    "falafel",
+    "hummus",
+    "shawarma",
+    "mezze"
+   ]
+  },
+  "the athenian": {
+   "cuisines": [
+    "greek"
+   ],
+   "dishes": [
+    "gyros",
+    "souvlaki",
+    "halloumi"
+   ]
+  },
+  "babel": {
+   "cuisines": [
+    "lebanese"
+   ],
+   "dishes": [
+    "shawarma",
+    "falafel"
+   ]
+  },
+  "arabica": {
+   "cuisines": [
+    "middle_eastern"
+   ],
+   "dishes": [
+    "mezze",
+    "hummus",
+    "falafel"
+   ]
+  },
+  "the real greek": {
+   "cuisines": [
+    "greek"
+   ],
+   "dishes": [
+    "souvlaki",
+    "halloumi",
+    "gyros",
+    "mezze"
+   ]
+  },
+  "tian tian": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "wing yip": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "see woo": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "hoo hing": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "loon fung": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "new loon moon": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "longdan": {
+   "cuisines": [
+    "vietnamese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "oseyo": {
+   "cuisines": [
+    "korean",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "h mart": {
+   "cuisines": [
+    "korean",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "korea foods": {
+   "cuisines": [
+    "korean",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "seoul plaza": {
+   "cuisines": [
+    "korean",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "japan centre": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "atariya": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "atari-ya": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "natural natural": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "arigato": {
+   "cuisines": [
+    "japanese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "hana": {
+   "cuisines": [
+    "korean",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "chinatown supermarket": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "china ark": {
+   "cuisines": [
+    "chinese",
+    "asian"
+   ],
+   "dishes": []
+  },
+  "thai smile": {
+   "cuisines": [
+    "thai",
+    "asian"
+   ],
+   "dishes": []
+  }
+ },
+ "types": {
+  "grocery": {
+   "words": [
+    "grocery",
+    "groceries",
+    "grocer",
+    "grocers",
+    "grocery store",
+    "grocery shop",
+    "supermarket",
+    "supermarkets",
+    "market",
+    "mart",
+    "minimart",
+    "mini market",
+    "food store",
+    "food shop",
+    "food hall",
+    "cash and carry",
+    "convenience",
+    "convenience store",
+    "corner shop",
+    "greengrocer",
+    "greengrocers",
+    "foods"
+   ],
+   "shop": [
+    "supermarket",
+    "convenience",
+    "greengrocer",
+    "grocery",
+    "deli",
+    "food",
+    "general",
+    "health_food",
+    "frozen_food",
+    "wholesale"
+   ]
+  },
+  "restaurant": {
+   "words": [
+    "restaurant",
+    "restaurants",
+    "food",
+    "eat",
+    "eats",
+    "dinner",
+    "lunch",
+    "takeaway",
+    "take away",
+    "fast food",
+    "street food",
+    "diner"
+   ],
+   "amenity": [
+    "restaurant",
+    "fast_food",
+    "food_court",
+    "cafe"
+   ]
+  },
+  "cafe": {
+   "words": [
+    "cafe",
+    "cafes",
+    "café",
+    "cafés",
+    "coffee shop"
+   ],
+   "amenity": [
+    "cafe"
+   ],
+   "shop": [
+    "coffee"
+   ]
+  },
+  "pub": {
+   "words": [
+    "pub",
+    "pubs",
+    "bar",
+    "bars",
+    "drinks",
+    "wine bar",
+    "cocktail bar",
+    "cocktails"
+   ],
+   "amenity": [
+    "pub",
+    "bar",
+    "biergarten"
+   ]
+  },
+  "bakery": {
+   "words": [
+    "bakery",
+    "bakeries",
+    "baker",
+    "bakers",
+    "patisserie"
+   ],
+   "shop": [
+    "bakery",
+    "pastry",
+    "confectionery"
+   ],
+   "cuisine": [
+    "bakery",
+    "pastry",
+    "patisserie"
+   ]
+  },
+  "pharmacy": {
+   "words": [
+    "pharmacy",
+    "pharmacies",
+    "chemist",
+    "chemists",
+    "drugstore"
+   ],
+   "amenity": [
+    "pharmacy"
+   ],
+   "shop": [
+    "chemist"
+   ],
+   "healthcare": [
+    "pharmacy"
+   ]
+  },
+  "garden": {
+   "words": [
+    "garden centre",
+    "garden center",
+    "garden centres",
+    "garden shop",
+    "nursery",
+    "plant shop",
+    "plants",
+    "garden"
+   ],
+   "shop": [
+    "garden_centre",
+    "garden"
+   ]
+  },
+  "florist": {
+   "words": [
+    "florist",
+    "florists",
+    "flowers",
+    "flower shop"
+   ],
+   "shop": [
+    "florist"
+   ]
+  },
+  "hardware": {
+   "words": [
+    "hardware",
+    "hardware store",
+    "diy",
+    "tools",
+    "diy store"
+   ],
+   "shop": [
+    "hardware",
+    "doityourself",
+    "trade",
+    "paint"
+   ]
+  },
+  "shoes": {
+   "words": [
+    "shoes",
+    "shoe",
+    "shoe shop",
+    "boots",
+    "trainers",
+    "sneakers",
+    "footwear"
+   ],
+   "shop": [
+    "shoes"
+   ]
+  },
+  "clothes": {
+   "words": [
+    "clothes",
+    "clothing",
+    "fashion"
+   ],
+   "shop": [
+    "clothes",
+    "boutique",
+    "fashion"
+   ]
+  },
+  "books": {
+   "words": [
+    "books",
+    "bookshop",
+    "bookstore",
+    "book shop"
+   ],
+   "shop": [
+    "books"
+   ]
+  },
+  "butcher": {
+   "words": [
+    "butcher",
+    "butchers",
+    "meat"
+   ],
+   "shop": [
+    "butcher"
+   ]
+  },
+  "fishmonger": {
+   "words": [
+    "fishmonger",
+    "fish shop",
+    "fish market"
+   ],
+   "shop": [
+    "seafood",
+    "fishmonger"
+   ]
+  },
+  "off licence": {
+   "words": [
+    "off licence",
+    "off license",
+    "wine shop",
+    "liquor",
+    "alcohol",
+    "beer shop"
+   ],
+   "shop": [
+    "alcohol",
+    "wine",
+    "beverages"
+   ]
+  },
+  "deli": {
+   "words": [
+    "deli",
+    "delicatessen"
+   ],
+   "shop": [
+    "deli"
+   ]
+  },
+  "electronics": {
+   "words": [
+    "electronics",
+    "phone shop",
+    "mobile phone"
+   ],
+   "shop": [
+    "electronics",
+    "mobile_phone",
+    "computer"
+   ]
+  },
+  "gym": {
+   "words": [
+    "gym",
+    "gyms",
+    "fitness"
+   ],
+   "leisure": [
+    "fitness_centre",
+    "sports_centre"
+   ]
+  },
+  "post office": {
+   "words": [
+    "post office"
+   ],
+   "amenity": [
+    "post_office"
+   ]
+  }
+ }
+}

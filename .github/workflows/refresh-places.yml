@@ -1,4 +1,4 @@
-name: Refresh places data
+name: Refresh places and menus
 on:
   schedule:
     - cron: "17 4 * * 1"   # Mondays 04:17 UTC
@@ -13,12 +13,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: pip install pypdf
       - run: python3 scripts/build_places.py
+      - run: python3 scripts/crawl_menus.py
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/places.json
-          if git diff --cached --quiet -- data/places.json; then echo "no change"; exit 0; fi
-          git commit -m "Refresh places data"
+          git add data/places.json data/menus.json
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Refresh places and menu data"
           git push

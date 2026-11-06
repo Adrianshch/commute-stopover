@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download named shops/amenities near each Central line station (Woodford -> Holborn)
+"""Download named shops/amenities near each Central line station (Woodford -> Holborn) and Bush House
 from OpenStreetMap via Overpass, and write a compact data/places.json for the site.
 
 Run:  python3 scripts/build_places.py
@@ -24,9 +24,11 @@ SKIP_AMENITY = {
     "letter_box", "smoking_area", "public_bookcase", "give_box", "lounger", "dog_toilet",
 }
 KEEP_TAGS = ["name", "brand", "shop", "amenity", "craft", "leisure", "healthcare", "cuisine",
-             "opening_hours", "website", "addr:housenumber", "addr:street", "addr:postcode"]
+             "opening_hours", "website", "contact:website", "brand:website", "addr:housenumber", "addr:street", "addr:postcode",
+             "diet:vegan", "diet:vegetarian", "diet:halal", "diet:gluten_free", "description"]
 SHORT = {"addr:housenumber": "hn", "addr:street": "st", "addr:postcode": "pc", "opening_hours": "oh",
-         "website": "web"}
+         "website": "web", "contact:website": "web", "brand:website": "bweb", "diet:vegan": "vegan",
+         "diet:vegetarian": "veg", "diet:halal": "halal", "diet:gluten_free": "gf", "description": "desc"}
 
 
 def query():
@@ -73,7 +75,7 @@ def main():
             continue
         p = {"id": key, "la": round(lat, 6), "lo": round(lon, 6)}
         for k in KEEP_TAGS:
-            if t.get(k):
+            if t.get(k) and SHORT.get(k, k) not in p:
                 p[SHORT.get(k, k)] = t[k]
         out.append(p)
     out.sort(key=lambda p: p["id"])

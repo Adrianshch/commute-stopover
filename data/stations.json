@@ -76,5 +76,12 @@
   "name": "Holborn",
   "lat": 51.51758,
   "lon": -0.120475
+ },
+ {
+  "id": "BUSHHOUSE",
+  "name": "Bush House",
+  "lat": 51.5128,
+  "lon": -0.1173,
+  "kind": "walk"
  }
 ]
