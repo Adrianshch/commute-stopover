@@ -106,11 +106,13 @@ details.setup a { color: var(--central); }
 .card .ver { grid-column: 1 / -1; font-size: 12px; }
 .card .ver.v { color: var(--open); }
 .card .ver.q { color: var(--muted); }
+.card .ver.p { color: var(--maybe); }
 .card .ver.x { color: var(--closed); font-weight: 600; }
 .card.gone { opacity: .6; }
 .vbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--muted); }
 .vbar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 .vbar input { accent-color: var(--central); }
+.card .links .mark { margin-left: auto; color: var(--muted); }
 .linkish { border: 0; background: none; padding: 0; color: var(--central); cursor: pointer; font-size: 13px; text-decoration: underline; }
 .card .meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 3px 12px; }
 .card .meta .st { color: var(--ink); font-weight: 500; }
@@ -153,7 +155,7 @@ footer a { color: inherit; }
     <div class="understood" id="understood"></div>
 
     <div class="vbar">
-      <label><input type="checkbox" id="verifiedOnly"> Only places confirmed open</label>
+      <label><input type="checkbox" id="verifiedOnly"> Only places confirmed open recently</label>
     </div>
 
     <div class="toolbar" id="toolbar" hidden>
@@ -177,7 +179,7 @@ footer a { color: inherit; }
     </details>
 
     <footer>
-      <b>How it works.</b> Walk times are estimates: straight-line distance from the nearest station (or Bush House) × 1.3, at 4.8 km/h. Food places are checked each week against the Food Standards Agency hygiene register, which every food business must be on; places that drop off it, or whose websites say they've closed, are hidden as likely closed. "Serves" means the place's name, cuisine label or website menu mentions what you searched for. "Might serve" means it's a cuisine that usually has it. Places off the line show the TfL Journey Planner time from the best stop.<br><br>
+      <b>How it works.</b> Walk times are estimates: straight-line distance from the nearest station (or Bush House) × 1.3, at 4.8 km/h. Food places are checked weekly. "Confirmed open" means a council hygiene inspection in the last 18 months, or an OpenStreetMap check in the last year. "Probably open" means it's on the Food Standards Agency register but was last inspected longer ago; councils can be slow to remove closed businesses. "Likely closed" places are hidden: they dropped off the register, Overture Maps lists them as closed, or their website is gone or says they've closed. "Mark as closed" hides a place on this device. "Serves" means the place's name, cuisine label or website menu mentions what you searched for. "Might serve" means it's a cuisine that usually has it. Places off the line show the TfL Journey Planner time from the best stop.<br><br>
       <span id="credits"></span> Journey times are powered by TfL Open Data.
     </footer>
   </main>
@@ -234,6 +236,7 @@ footer a { color: inherit; }
   const state = {
     openOnly: store.get("cs.openOnly", false), gkey: store.get("cs.gkey", ""),
     verifiedOnly: store.get("cs.verifiedOnly", false), showClosed: false, verify: {},
+    marked: new Set(store.get("cs.markedClosed", [])), // places you've marked closed on this device
     places: null, food: null, menus: {}, cands: [], query: null, stationFilter: null, activeKey: null,
     far: null, farLoading: false, farError: null, markers: {}, loading: false,
   };
@@ -433,9 +436,19 @@ footer a { color: inherit; }
     return out;
   }
   // Verification from the food hygiene register (see scripts/verify_places.py): v=verified, x=likely closed, t=temp closed.
+  function monthsAgo(d) {
+    if (!d || !/^\d{4}-\d{2}/.test(d)) return 999;
+    const now = new Date();
+    return (now.getFullYear() - +d.slice(0, 4)) * 12 + (now.getMonth() + 1 - +d.slice(5, 7));
+  }
   function verifyOf(p) {
     const v = state.verify[p.id];
-    if (v) return { s: v[0], r: v[1], d: v[2] };
+    if (v && v[0] === "v") {
+      const recent = monthsAgo(v[2]) <= 18 || monthsAgo(v[3]) <= 12;
+      return { s: recent ? "v" : "p", r: v[1], d: v[2], chk: v[3] };
+    }
+    if (v && v[0] === "?") return { s: monthsAgo(v[1]) <= 12 ? "v" : "?", chk: v[1], osmOnly: true };
+    if (v) return { s: v[0], r: v[1] };
     return FOOD_A.has(p.amenity) || FOOD_S.has(p.shop) ? { s: "?" } : null; // non-food shops can't be checked
   }
   const osmToPlace = (p) => ({
@@ -590,7 +603,8 @@ footer a { color: inherit; }
     }
     return best;
   }
-  const isClosed = (i) => i.ver && (i.ver.s === "x" || i.ver.s === "t");
+  const isMarked = (i) => state.marked.has(i.id);
+  const isClosed = (i) => isMarked(i) || (i.ver && (i.ver.s === "x" || i.ver.s === "t"));
   function computeNear(includeHidden = false) {
     const out = [];
     for (const p of state.cands) {
@@ -600,7 +614,7 @@ footer a { color: inherit; }
       if (!passesOpen(item)) continue;
       if (!includeHidden) {
         if (isClosed(item) && !state.showClosed) continue;
-        if (state.verifiedOnly && item.ver && item.ver.s !== "v") continue;
+        if (state.verifiedOnly && item.ver && item.ver.s !== "v") continue; // only recently confirmed
       }
       out.push(item);
     }
@@ -693,25 +707,28 @@ footer a { color: inherit; }
     return h;
   }
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthName = (d) => `${MONTHS[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}`;
   function verHtml(i) {
+    if (isMarked(i)) return `<div class="ver x">You marked this as closed · <button type="button" class="linkish" data-unmark="${esc(i.id)}">undo</button></div>`;
     const v = i.ver;
     if (!v) return "";
-    if (v.s === "v") {
-      const when = v.d ? ` · inspected ${MONTHS[+v.d.slice(5, 7) - 1]} ${v.d.slice(0, 4)}` : "";
-      const rating = /^[0-5]$/.test(v.r) ? `hygiene ${v.r}/5` : "registered";
-      return `<div class="ver v">✓ On the food hygiene register · ${rating}${when}</div>`;
-    }
+    const rating = /^[0-5]$/.test(v.r || "") ? ` · hygiene ${v.r}/5` : "";
+    const osm = v.chk && monthsAgo(v.chk) <= 12 ? ` · checked on OpenStreetMap ${monthName(v.chk)}` : "";
+    if (v.s === "v" && v.osmOnly) return `<div class="ver v">✓ Confirmed open${osm}</div>`;
+    if (v.s === "v") return `<div class="ver v">✓ Confirmed open · council inspected ${monthName(v.d)}${rating}${osm}</div>`;
+    if (v.s === "p") return `<div class="ver p">Probably open · last council inspection ${v.d ? monthName(v.d) : "unknown"}, so it may have closed since</div>`;
     if (v.s === "t") return `<div class="ver x">Temporarily closed (says its website)</div>`;
-    if (v.s === "x") return `<div class="ver x">Likely closed · ${v.r === "site" ? "its website says it has closed" : v.r === "dead" ? "its website no longer exists" : "no longer on the food hygiene register"}</div>`;
-    return `<div class="ver q">Not verified · not found on the food hygiene register</div>`;
+    if (v.s === "x") return `<div class="ver x">Likely closed · ${{ site: "its website says it has closed", dead: "its website no longer exists", overture: "listed as permanently closed in Overture Maps", fhrs: "no longer on the food hygiene register" }[v.r] || "no longer listed"}</div>`;
+    return `<div class="ver q">Not verified · not on the food hygiene register</div>`;
   }
   const whyHtml = (i) => (i.why && i.why.length ? `<div class="why">${[...new Set(i.why)].map((w) => `<span>${esc(w)}</span>`).join("")}</div>` : "");
-  function placeLinks(i, mode) {
+  function placeLinks(i, mode, markable = false) {
     const dir = `https://www.google.com/maps/dir/?api=1&origin=${i.station.lat},${i.station.lon}&destination=${i.lat},${i.lon}&travelmode=${mode}`;
     const g = i.gmaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(i.name + " " + (i.addr || "London"))}`;
     return `<div class="links"><a href="${esc(g)}" target="_blank" rel="noopener">Open in Google Maps</a>
       <a href="${dir}" target="_blank" rel="noopener">${mode === "walking" ? "Walking" : "Transit"} directions</a>
-      ${i.web ? `<a href="${esc(safeUrl(i.web))}" target="_blank" rel="noopener">Website</a>` : ""}</div>`;
+      ${i.web ? `<a href="${esc(safeUrl(i.web))}" target="_blank" rel="noopener">Website</a>` : ""}
+      ${markable && i.src === "osm" && !isMarked(i) ? `<button type="button" class="linkish mark" data-mark="${esc(i.id)}">Mark as closed</button>` : ""}</div>`;
   }
   function nearCard(i) {
     return `<article class="card ${i.lvl < 3 ? "maybe" : ""} ${isClosed(i) ? "gone" : ""} ${state.activeKey === i.key ? "active" : ""}" data-key="${esc(i.key)}">
@@ -721,7 +738,7 @@ footer a { color: inherit; }
       ${whyHtml(i)}${verHtml(i)}${hoursHtml(i)}
       <div class="meta"><span class="st">from ${esc(i.station.name)}</span><span>${Math.round(i.dist)} m</span>
         ${i.addr ? `<span>${esc(i.addr)}</span>` : ""}</div>
-      ${extrasHtml(i)}${placeLinks(i, "walking")}
+      ${extrasHtml(i)}${placeLinks(i, "walking", true)}
     </article>`;
   }
   function farCard(i) {
@@ -874,6 +891,12 @@ footer a { color: inherit; }
   $("#results").addEventListener("click", (e) => {
     if (e.target.closest("#moreBtn")) { runFar(); return; }
     if (e.target.closest("#showClosed")) { state.showClosed = !state.showClosed; render(); return; }
+    const mk = e.target.closest("[data-mark]"), um = e.target.closest("[data-unmark]");
+    if (mk || um) {
+      if (mk) state.marked.add(mk.dataset.mark); else state.marked.delete(um.dataset.unmark);
+      store.set("cs.markedClosed", [...state.marked]);
+      render(); return;
+    }
     if (e.target.closest("a")) return;
     const c = e.target.closest(".card");
     if (c) setActive(c.dataset.key === state.activeKey ? null : c.dataset.key, c.dataset.key !== state.activeKey);

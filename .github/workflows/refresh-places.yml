@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pypdf
+      - run: pip install pypdf duckdb
       - run: python3 scripts/build_places.py
       - run: python3 scripts/crawl_menus.py
       - run: python3 scripts/verify_places.py

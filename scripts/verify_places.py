@@ -3,12 +3,15 @@
 
 Every UK food business must register with its council, and closed businesses drop off the register.
 For each food place in data/places.json:
-  - "v" verified: found in the register (by its OSM fhrs:id, or same name nearby / same postcode)
-  - "x" likely closed: its fhrs:id is no longer in the register and nothing with its name is nearby,
-        or its website says it has closed / the domain is dead (from data/menus.json)
+  - "v" on the register (by its OSM fhrs:id, or same name nearby / same postcode): ["v", rating, inspection date, osm check date]
+        The app shows it as confirmed if inspected in the last 18 months (or checked on OSM in the last year),
+        otherwise as "probably open" — councils can be slow to remove closed businesses.
+  - "x" likely closed: ["x", reason] — its website says it has closed; or it dropped off the register; or Overture Maps
+        (Meta/Microsoft/Foursquare data) marks it permanently closed and no recent inspection says otherwise;
+        or its website domain is dead
   - "t" temporarily closed (website notice)
-  - (absent) unverified: no evidence either way
-Writes data/verify.json: {"places": {"n123": ["v", "5", "2026-03-18"], "w456": ["x", "fhrs"], ...}}
+  - "?" not on the register: ["?", osm check date] (only written when there's a check date)
+Writes data/verify.json.  Optional: pip install duckdb  -> also uses Overture Maps closure flags.
 
 Run:  python3 scripts/verify_places.py   (after build_places.py and crawl_menus.py)
 """
@@ -74,6 +77,41 @@ def load_register():
     return reg
 
 
+def load_overture_closed(places):
+    """Overture Maps places marked permanently_closed near our places (needs duckdb; skipped if unavailable)."""
+    try:
+        import duckdb  # type: ignore
+    except Exception:  # noqa: BLE001
+        print("duckdb not installed: skipping Overture check", file=sys.stderr)
+        return []
+    try:
+        cat = json.load(urllib.request.urlopen("https://stac.overturemaps.org/catalog.json", timeout=60))
+        release = cat["latest"]
+        lats, lons = [p["la"] for p in places], [p["lo"] for p in places]
+        con = duckdb.connect()
+        con.execute("INSTALL httpfs; LOAD httpfs; INSTALL spatial; LOAD spatial; SET s3_region='us-west-2';")
+        rows = con.execute(f"""
+            SELECT names.primary, ST_Y(geometry), ST_X(geometry), operating_status
+            FROM read_parquet('s3://overturemaps-us-west-2/release/{release}/theme=places/type=place/*', hive_partitioning=1)
+            WHERE bbox.xmin BETWEEN {min(lons) - 0.002} AND {max(lons) + 0.002}
+              AND bbox.ymin BETWEEN {min(lats) - 0.002} AND {max(lats) + 0.002}
+              AND names.primary IS NOT NULL""").fetchall()
+        print(f"overture {release}: {len(rows)} places, {sum(1 for r in rows if r[3] == 'permanently_closed')} marked closed", file=sys.stderr)
+        return rows
+    except Exception as e:  # noqa: BLE001
+        print(f"Overture check failed, skipping: {e}", file=sys.stderr)
+        return []
+
+
+def months_ago(date_str):
+    try:
+        y, m = int(date_str[:4]), int(date_str[5:7])
+    except Exception:  # noqa: BLE001
+        return 999
+    now = time.gmtime()
+    return (now.tm_year - y) * 12 + (now.tm_mon - m)
+
+
 def host_of(u):
     if not u:
         return ""
@@ -96,10 +134,19 @@ def main():
     except FileNotFoundError:
         site_status = {}
 
+    food = [p for p in places if p.get("amenity") in FOOD_A or p.get("shop") in FOOD_S]
+    ov_grid = collections.defaultdict(list)
+    for name, lat, lon, st in load_overture_closed(food):
+        ov_grid[(round(lat * 400), round(lon * 400))].append((norm(name), lat, lon, st))
+
+    def overture_status(p, n):
+        k = (round(p["la"] * 400), round(p["lo"] * 400))
+        sts = {st for dx in (-1, 0, 1) for dy in (-1, 0, 1) for (on, la, lo, st) in ov_grid[(k[0] + dx, k[1] + dy)]
+               if dist(p["la"], p["lo"], la, lo) < 80 and sim(n, on) >= 0.85}
+        return "closed" if sts == {"permanently_closed"} else ("open" if "open" in sts else "")
+
     out, stats = {}, collections.Counter()
-    for p in places:
-        if p.get("amenity") not in FOOD_A and p.get("shop") not in FOOD_S:
-            continue
+    for p in food:
         n = norm(p.get("name") or p.get("brand"))
         pc = (p.get("pc") or "").replace(" ", "").upper()
         k = (round(p["la"] * 200), round(p["lo"] * 200))
@@ -116,22 +163,25 @@ def main():
                     best = (s, d, r)
         fid = (p.get("fhrs") or "").strip()
         site = site_status.get(host_of(p.get("web")), "")
-        if fid and fid in by_id:
-            r = by_id[fid]
-            out[p["id"]] = ["v", r["r"], r["d"]]
-        elif best:
-            out[p["id"]] = ["v", best[2]["r"], best[2]["d"]]
-        elif site == "closed":
+        chk = (p.get("chk") or "")[:10]
+        reg = by_id[fid] if fid and fid in by_id else best[2] if best else None
+        ov = overture_status(p, n)
+        recent = (reg and months_ago(reg["d"]) <= 18) or months_ago(chk) <= 12
+        if site == "closed":
             out[p["id"]] = ["x", "site"]
+        elif site == "temp":
+            out[p["id"]] = ["t", "site"]
+        elif reg and not (ov == "closed" and not recent):
+            out[p["id"]] = ["v", reg["r"], reg["d"], chk]
+        elif reg or ov == "closed":
+            out[p["id"]] = ["x", "overture"]
         elif fid:
             out[p["id"]] = ["x", "fhrs"]
         elif site == "dead":
             out[p["id"]] = ["x", "dead"]
-        if site == "temp" and p["id"] in out and out[p["id"]][0] == "v":
-            out[p["id"]] = ["t", "site"]
-        elif site == "temp" and p["id"] not in out:
-            out[p["id"]] = ["t", "site"]
-        stats[out.get(p["id"], ["?"])[0]] += 1
+        elif chk:
+            out[p["id"]] = ["?", chk]
+        stats[out.get(p["id"], ["?"])[0] + ("" if out.get(p["id"], ["?"])[0] != "v" else "-recent" if recent else "-old")] += 1
     json.dump({"generated": time.strftime("%Y-%m-%d"), "places": out},
               open(os.path.join(DATA, "verify.json"), "w"), separators=(",", ":"))
     print("verified (v) / likely closed (x) / temporarily closed (t) / unverified (?):", dict(stats), file=sys.stderr)

@@ -13,7 +13,13 @@ Find food and errands within a 15-minute walk of my Central line commute (Woodfo
   - *chains*: known menus (Wagamama → ramen, Dishoom → lassi)
 - **Menus:** `scripts/crawl_menus.py` reads each restaurant website's home and menu pages, PDF menus included, and records which dish words appear (`data/menus.json`).
 - Results come in two groups: **Serves X** (confirmed by name, cuisine tag, menu or chain) and **Might serve X** (the cuisine usually has it).
-- **Closed places:** `scripts/verify_places.py` checks every food place against the [Food Standards Agency hygiene register](https://ratings.food.gov.uk/open-data) (`data/verify.json`). Every UK food business has to be on it, and closed ones drop off. Results show "✓ On the food hygiene register" (with rating and last inspection), "Not verified", or, hidden by default, "Likely closed" (dropped off the register, or its website is gone or says it has closed). The register only covers food businesses, so pharmacies, garden centres and other shops aren't checked.
+- **Closed places:** `scripts/verify_places.py` (`data/verify.json`) checks every food place against:
+  - the [Food Standards Agency hygiene register](https://ratings.food.gov.uk/open-data), which every food business has to be on; closed ones drop off, though councils can be slow to remove them
+  - [Overture Maps](https://overturemaps.org) "permanently closed" flags (Meta, Microsoft and Foursquare data, read with DuckDB)
+  - the website scan: dead domains and "we have closed" notices
+  - OpenStreetMap `check_date`
+
+  The app shows **✓ Confirmed open** (council inspection in the last 18 months, or an OSM check in the last year), **Probably open** (on the register but last inspected longer ago), **Not verified**, or, hidden by default, **Likely closed**. "Mark as closed" hides a place on that device. Only food businesses can be checked this way.
 - **Off the line:** if fewer than 3 places are confirmed nearby, it searches wider London with [Photon](https://photon.komoot.io) and shows the TfL Journey Planner time from the best stop.
 
 There's no free source of reviews, so unlike Google it can't search review text. Menus and the knowledge file stand in for that.
@@ -21,7 +27,7 @@ There's no free source of reviews, so unlike Google it can't search review text.
 ## Refresh the data
 
 ```bash
-pip install pypdf
+pip install pypdf duckdb
 python3 scripts/build_places.py
 python3 scripts/crawl_menus.py
 python3 scripts/verify_places.py
