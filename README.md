@@ -19,7 +19,7 @@ Find food and errands within a 15-minute walk of my Central line commute (Woodfo
   - the website scan: dead domains and "we have closed" notices
   - OpenStreetMap `check_date`
 
-  The app shows **✓ Confirmed open** (council inspection in the last 18 months, or an OSM check in the last year), **Probably open** (on the register but last inspected longer ago), **Not verified**, or, hidden by default, **Likely closed**. "Mark as closed" hides a place on that device. Only food businesses can be checked this way.
+  Food places only appear if they match the hygiene register: **✓ Confirmed open** (council inspection in the last 18 months, or an OSM check in the last year) or **Probably open** (an older inspection). Places that are unmatched or likely closed are left out. "Mark as closed" hides a place on that device. Non-food shops such as pharmacies and garden centres can't be on the register, so they always show.
 - **Off the line:** if fewer than 3 places are confirmed nearby, it searches wider London with [Photon](https://photon.komoot.io) and shows the TfL Journey Planner time from the best stop.
 
 There's no free source of reviews, so unlike Google it can't search review text. Menus and the knowledge file stand in for that.

@@ -112,7 +112,7 @@ details.setup a { color: var(--central); }
 .vbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--muted); }
 .vbar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 .vbar input { accent-color: var(--central); }
-.card .links .mark { margin-left: auto; color: var(--muted); }
+.card .links .mark { color: var(--muted); font-size: 13px; }
 .linkish { border: 0; background: none; padding: 0; color: var(--central); cursor: pointer; font-size: 13px; text-decoration: underline; }
 .card .meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 3px 12px; }
 .card .meta .st { color: var(--ink); font-weight: 500; }
@@ -152,10 +152,9 @@ footer a { color: inherit; }
     </form>
 
     <div class="chips" id="chips"></div>
-    <div class="understood" id="understood"></div>
 
     <div class="vbar">
-      <label><input type="checkbox" id="verifiedOnly"> Only places confirmed open recently</label>
+      <label><input type="checkbox" id="verifiedOnly"> Confirmed open only</label>
     </div>
 
     <div class="toolbar" id="toolbar" hidden>
@@ -179,7 +178,7 @@ footer a { color: inherit; }
     </details>
 
     <footer>
-      <b>How it works.</b> Walk times are estimates: straight-line distance from the nearest station (or Bush House) × 1.3, at 4.8 km/h. Food places are checked weekly. "Confirmed open" means a council hygiene inspection in the last 18 months, or an OpenStreetMap check in the last year. "Probably open" means it's on the Food Standards Agency register but was last inspected longer ago; councils can be slow to remove closed businesses. "Likely closed" places are hidden: they dropped off the register, Overture Maps lists them as closed, or their website is gone or says they've closed. "Mark as closed" hides a place on this device. "Serves" means the place's name, cuisine label or website menu mentions what you searched for. "Might serve" means it's a cuisine that usually has it. Places off the line show the TfL Journey Planner time from the best stop.<br><br>
+      <b>How it works.</b> Walk times are estimates. Food places only appear if they're on the Food Standards Agency hygiene register: <b>Confirmed open</b> means a council inspection in the last 18 months, and <b>Probably open</b> means an older one. "Mark as closed" hides a place on this device.<br><br>
       <span id="credits"></span> Journey times are powered by TfL Open Data.
     </footer>
   </main>
@@ -235,7 +234,7 @@ footer a { color: inherit; }
   };
   const state = {
     openOnly: store.get("cs.openOnly", false), gkey: store.get("cs.gkey", ""),
-    verifiedOnly: store.get("cs.verifiedOnly", false), showClosed: false, verify: {},
+    verifiedOnly: store.get("cs.verifiedOnly", false), verify: {},
     marked: new Set(store.get("cs.markedClosed", [])), // places you've marked closed on this device
     places: null, food: null, menus: {}, cands: [], query: null, stationFilter: null, activeKey: null,
     far: null, farLoading: false, farError: null, markers: {}, loading: false,
@@ -337,7 +336,8 @@ footer a { color: inherit; }
     const cu = new Set((p.cuisine || "").toLowerCase().split(/\s*;\s*/).filter(Boolean));
     const name = norm(p.name || p.brand || "");
     const pn = " " + name + " ";
-    for (const [re, c] of KB.hints) if (re.test(p.name || "")) cu.add(c);
+    const isFood = FOOD_A.has(p.amenity) || FOOD_S.has(p.shop);
+    if (isFood) for (const [re, c] of KB.hints) if (re.test(p.name || "")) cu.add(c); // "State Bank of India" isn't Indian food
     const dishes = new Set(), why = {};
     const chain = KB.chains.find(([k]) => pn.startsWith(" " + k + " ") || norm(p.brand || "") === k);
     if (chain) { chain[1].cuisines.forEach((c) => cu.add(c)); chain[1].dishes.forEach((d) => { dishes.add(norm(d)); why[norm(d)] = "chain menu"; }); }
@@ -457,16 +457,7 @@ footer a { color: inherit; }
     addr: [[p.hn, p.st].filter(Boolean).join(" "), p.pc].filter(Boolean).join(", "), ohText: p.oh, web: p.web,
     osmUrl: `https://www.openstreetmap.org/${{ n: "node", w: "way", r: "relation" }[p.id[0]]}/${p.id.slice(1)}`,
   });
-  function describeQuery(q) {
-    if (!q || useGoogle()) return "";
-    const bits = q.slots.map((s) => {
-      const c = s.concepts.map((c) => c.kind === "type" ? `${c.id} (type of place)` : c.kind === "cuisine" ? `${c.id} (cuisine)` : `${s.phrase} (dish)`);
-      return [...new Set(c)].join(" or ");
-    });
-    q.leftovers.forEach((w) => bits.push(`"${w}" in the name`));
-    if (!bits.length) return "";
-    return `Searching for: <b>${bits.map(esc).join("</b> + <b>")}</b>${q.slots.length || q.leftovers.length ? `, or "${esc(q.raw)}" in a name` : ""}`;
-  }
+
 
   // ---------- Google (paused feature; only active when a key is saved) ----------
   let gReady = null;
@@ -604,18 +595,18 @@ footer a { color: inherit; }
     return best;
   }
   const isMarked = (i) => state.marked.has(i.id);
-  const isClosed = (i) => isMarked(i) || (i.ver && (i.ver.s === "x" || i.ver.s === "t"));
-  function computeNear(includeHidden = false) {
+  // Food places only show if they matched the hygiene register (confirmed or probably open).
+  // Non-food shops (pharmacy, garden centre…) can't be on it, so they always show.
+  const onRegister = (i) => !i.ver || ((i.ver.s === "v" || i.ver.s === "p") && !i.ver.osmOnly);
+  function computeNear() {
     const out = [];
     for (const p of state.cands) {
       const b = bestStop(p);
       if (!b) continue;
       const item = { ...p, key: p.id, station: b.s, dist: b.d, walk: b.w };
       if (!passesOpen(item)) continue;
-      if (!includeHidden) {
-        if (isClosed(item) && !state.showClosed) continue;
-        if (state.verifiedOnly && item.ver && item.ver.s !== "v") continue; // only recently confirmed
-      }
+      if (isMarked(item) || !onRegister(item)) continue;
+      if (state.verifiedOnly && item.ver && item.ver.s !== "v") continue; // confirmed open only
       out.push(item);
     }
     return out.sort((a, b) => a.walk - b.walk);
@@ -709,19 +700,10 @@ footer a { color: inherit; }
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const monthName = (d) => `${MONTHS[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}`;
   function verHtml(i) {
-    if (isMarked(i)) return `<div class="ver x">You marked this as closed · <button type="button" class="linkish" data-unmark="${esc(i.id)}">undo</button></div>`;
     const v = i.ver;
     if (!v) return "";
-    const rating = /^[0-5]$/.test(v.r || "") ? ` · hygiene ${v.r}/5` : "";
-    const osm = v.chk && monthsAgo(v.chk) <= 12 ? ` · checked on OpenStreetMap ${monthName(v.chk)}` : "";
-    if (v.s === "v" && v.osmOnly) return `<div class="ver v">✓ Confirmed open${osm}</div>`;
-    if (v.s === "v") return `<div class="ver v">✓ Confirmed open · council inspected ${monthName(v.d)}${rating}${osm}</div>`;
-    if (v.s === "p") return `<div class="ver p">Probably open · last council inspection ${v.d ? monthName(v.d) : "unknown"}, so it may have closed since</div>`;
-    if (v.s === "t") return `<div class="ver x">Temporarily closed (says its website)</div>`;
-    if (v.s === "x") return `<div class="ver x">Likely closed · ${{ site: "its website says it has closed", dead: "its website no longer exists", overture: "listed as permanently closed in Overture Maps", fhrs: "no longer on the food hygiene register" }[v.r] || "no longer listed"}</div>`;
-    return `<div class="ver q">Not verified · not on the food hygiene register</div>`;
+    return v.s === "v" ? `<div class="ver v">✓ Confirmed open</div>` : `<div class="ver p">Probably open</div>`;
   }
-  const whyHtml = (i) => (i.why && i.why.length ? `<div class="why">${[...new Set(i.why)].map((w) => `<span>${esc(w)}</span>`).join("")}</div>` : "");
   function placeLinks(i, mode, markable = false) {
     const dir = `https://www.google.com/maps/dir/?api=1&origin=${i.station.lat},${i.station.lon}&destination=${i.lat},${i.lon}&travelmode=${mode}`;
     const g = i.gmaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(i.name + " " + (i.addr || "London"))}`;
@@ -731,12 +713,12 @@ footer a { color: inherit; }
       ${markable && i.src === "osm" && !isMarked(i) ? `<button type="button" class="linkish mark" data-mark="${esc(i.id)}">Mark as closed</button>` : ""}</div>`;
   }
   function nearCard(i) {
-    return `<article class="card ${i.lvl < 3 ? "maybe" : ""} ${isClosed(i) ? "gone" : ""} ${state.activeKey === i.key ? "active" : ""}" data-key="${esc(i.key)}">
+    return `<article class="card ${i.lvl < 3 ? "maybe" : ""} ${state.activeKey === i.key ? "active" : ""}" data-key="${esc(i.key)}">
       <div class="name">${esc(i.name)}</div>
       <div class="cost"><b>${Math.max(1, Math.round(i.walk))} min</b><span>walk</span></div>
       ${ratingHtml(i)}<div class="kind">${esc(i.kind)}</div>
-      ${whyHtml(i)}${verHtml(i)}${hoursHtml(i)}
-      <div class="meta"><span class="st">from ${esc(i.station.name)}</span><span>${Math.round(i.dist)} m</span>
+      ${verHtml(i)}${hoursHtml(i)}
+      <div class="meta"><span class="st">from ${esc(i.station.name)}</span>
         ${i.addr ? `<span>${esc(i.addr)}</span>` : ""}</div>
       ${extrasHtml(i)}${placeLinks(i, "walking", true)}
     </article>`;
@@ -788,9 +770,6 @@ footer a { color: inherit; }
     if (!state.query || state.loading) { box.innerHTML = ""; return; }
     const where = state.stationFilter ? STATIONS.find((s) => s.id === state.stationFilter).name : "the line";
     let html = `<h2>${hasDish ? `Serves ${esc(label)}` : "On the line"} <small>· ${state.stationFilter ? `within ${maxWalkOf(STATIONS.find((x) => x.id === state.stationFilter))} min walk of ${esc(where)}` : "within 15 min walk of the line, 20 of Bush House"}</small></h2>`;
-    const hidden = state.showClosed ? 0 : computeNear(true).filter((i) => isClosed(i) && (!state.stationFilter || i.station.id === state.stationFilter)).length;
-    if (hidden) html += `<div class="vbar">${hidden} likely-closed place${hidden > 1 ? "s" : ""} hidden · <button type="button" class="linkish" id="showClosed">show</button></div>`;
-    else if (state.showClosed) html += `<div class="vbar"><button type="button" class="linkish" id="showClosed">hide likely-closed places</button></div>`;
     html += sure.length ? sure.slice(0, 80).map(nearCard).join("") + (sure.length > 80 ? `<div class="empty">Showing the 80 closest of ${sure.length}.</div>` : "")
       : `<div class="empty">Nothing found${hasDish ? " that definitely serves it" : ""}.</div>`;
     if (maybe.length) {
@@ -862,7 +841,6 @@ footer a { color: inherit; }
       state.cands = []; state.query = state.query || { raw: text, slots: [], leftovers: [] };
       setStatus("Search failed: " + e.message, true);
     }
-    $("#understood").innerHTML = describeQuery(state.query);
     state.loading = false;
     render(); fitToResults();
     if (computeNear().filter((i) => i.lvl >= 3).length < OFF_ROUTE_MIN) runFar();
@@ -890,10 +868,9 @@ footer a { color: inherit; }
   $("#stations").addEventListener("click", (e) => { const b = e.target.closest("button[data-st]"); if (b) toggleStation(b.dataset.st); });
   $("#results").addEventListener("click", (e) => {
     if (e.target.closest("#moreBtn")) { runFar(); return; }
-    if (e.target.closest("#showClosed")) { state.showClosed = !state.showClosed; render(); return; }
-    const mk = e.target.closest("[data-mark]"), um = e.target.closest("[data-unmark]");
-    if (mk || um) {
-      if (mk) state.marked.add(mk.dataset.mark); else state.marked.delete(um.dataset.unmark);
+    const mk = e.target.closest("[data-mark]");
+    if (mk) {
+      state.marked.add(mk.dataset.mark);
       store.set("cs.markedClosed", [...state.marked]);
       render(); return;
     }
