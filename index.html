@@ -112,7 +112,21 @@ details.setup a { color: var(--central); }
 .vbar { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--muted); }
 .vbar label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
 .vbar input { accent-color: var(--central); }
-.card .links .mark { color: var(--muted); font-size: 13px; }
+.notes { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; padding-top: 8px; border-top: 1px dashed var(--line); font-size: 12px; color: var(--muted); }
+.notes .star { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; width: 32px; height: 30px; font-size: 17px; line-height: 1; cursor: pointer; color: var(--muted); padding: 0; }
+.notes .star[aria-pressed="true"] { color: var(--star); border-color: var(--star); background: color-mix(in srgb, var(--star) 12%, var(--panel)); }
+.notes label { display: inline-flex; align-items: center; gap: 4px; }
+.notes input { width: 30px; height: 30px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); font-size: 15px; font-weight: 600; padding: 0; }
+.notes input:focus { outline: none; border-color: var(--central); }
+.danger { grid-column: 1 / -1; display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+.danger .closebtn { color: var(--muted); font-size: 12px; }
+.danger .closebtn[data-armed] { color: var(--closed); font-weight: 600; }
+.mine { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; padding-top: 14px; border-top: 2px solid var(--line); }
+.mine h2 { font-size: 16px; margin: 0; }
+.mine .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.mine select { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 6px 8px; font-size: 14px; }
+.mine .card { cursor: default; }
+.mine .avg { color: var(--star); font-weight: 600; }
 .linkish { border: 0; background: none; padding: 0; color: var(--central); cursor: pointer; font-size: 13px; text-decoration: underline; }
 .card .meta { grid-column: 1 / -1; font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 3px 12px; }
 .card .meta .st { color: var(--ink); font-weight: 500; }
@@ -166,6 +180,31 @@ footer a { color: inherit; }
     <div class="status" id="status" role="status"></div>
     <div class="results" id="results"></div>
 
+    <section class="mine" id="mine">
+      <h2>My places</h2>
+      <div class="row">
+        <select id="mineStop" aria-label="Stop"></select>
+        <select id="mineFilter" aria-label="Show">
+          <option value="any">Starred or rated</option>
+          <option value="star">Starred only</option>
+          <option value="rated">Rated only</option>
+          <option value="closed">Marked closed</option>
+        </select>
+      </div>
+      <div class="results" id="mineList"></div>
+    </section>
+
+    <details class="setup" id="sync">
+      <summary>Save stars &amp; ratings to GitHub <span id="syncBadge"></span></summary>
+      <p>Stars and ratings save in this browser straight away. Add a GitHub token to also save them to your private <b>commute-stopover-notes</b> repo, so they're permanent and shared between your phone and laptop. The token is saved only in this browser.</p>
+      <div class="row">
+        <input id="ghtoken" type="password" placeholder="Paste GitHub token (github_pat_…)" autocomplete="off" spellcheck="false" aria-label="GitHub token">
+        <button type="button" id="ghsave">Save</button>
+      </div>
+      <p id="syncStatus"></p>
+      <p><a href="https://github.com/Adrianshch/commute-stopover#saving-stars-and-ratings" target="_blank" rel="noopener">How to set this up →</a></p>
+    </details>
+
     <details class="setup" id="setup">
       <summary>Google Maps data (paused)</summary>
       <p>With a Google Maps key, searches use Google: full search, ratings, live opening hours and photos. The key is saved only in this browser. It never goes into the website's code.</p>
@@ -178,7 +217,7 @@ footer a { color: inherit; }
     </details>
 
     <footer>
-      <b>How it works.</b> Walk times are estimates. Food places only appear if they're on the Food Standards Agency hygiene register: <b>Confirmed open</b> means a council inspection in the last 18 months, and <b>Probably open</b> means an older one. "Mark as closed" hides a place on this device.<br><br>
+      <b>How it works.</b> Walk times are estimates. Food places only appear if they're on the Food Standards Agency hygiene register: <b>Confirmed open</b> means a council inspection in the last 18 months, and <b>Probably open</b> means an older one. Stars, ratings and "Mark as closed" are saved in this browser, and to your private GitHub repo once you add a token.<br><br>
       <span id="credits"></span> Journey times are powered by TfL Open Data.
     </footer>
   </main>
@@ -235,11 +274,85 @@ footer a { color: inherit; }
   const state = {
     openOnly: store.get("cs.openOnly", false), gkey: store.get("cs.gkey", ""),
     verifiedOnly: store.get("cs.verifiedOnly", false), verify: {},
-    marked: new Set(store.get("cs.markedClosed", [])), // places you've marked closed on this device
+    itemsByKey: {},
     places: null, food: null, menus: {}, cands: [], query: null, stationFilter: null, activeKey: null,
     far: null, farLoading: false, farError: null, markers: {}, loading: false,
   };
   const useGoogle = () => !!state.gkey;
+
+  // ---------- my notes: star, health/taste/value 1–5, marked closed ----------
+  // Saved in this browser immediately; synced to a private GitHub repo when a token is set.
+  const NOTES_REPO = "Adrianshch/commute-stopover-notes", NOTES_PATH = "notes.json";
+  const FIELDS = ["health", "taste", "value"];
+  const notes = store.get("cs.notes", { version: 1, places: {} });
+  for (const id of store.get("cs.markedClosed", [])) if (!notes.places[id]) notes.places[id] = { closed: true, t: Date.now() };
+  store.del("cs.markedClosed");
+  const hasNote = (n) => n && (n.star || FIELDS.some((f) => n[f]) || n.closed);
+  function setNote(info, patch) {
+    const prev = notes.places[info.id] || {};
+    notes.places[info.id] = { ...prev, name: info.name, stop: info.stop, lat: info.lat, lon: info.lon, kind: info.kind || prev.kind || "",
+      addr: info.addr || prev.addr || "", gmaps: info.gmaps || prev.gmaps || "", ...patch, t: Date.now() };
+    store.set("cs.notes", notes);
+    scheduleSync();
+    renderMine();
+  }
+  const noteInfo = (i) => ({ id: i.id, name: i.name, stop: i.station?.id || i.stop, lat: i.lat, lon: i.lon, kind: i.kind, addr: i.addr, gmaps: i.gmaps });
+
+  const gh = {
+    token: store.get("cs.ghToken", ""), sha: null, timer: null, busy: false, again: false, last: null, err: null,
+    async req(method, body) {
+      const r = await fetch(`https://api.github.com/repos/${NOTES_REPO}/contents/${NOTES_PATH}`, {
+        method, headers: { Authorization: `Bearer ${this.token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", ...(body ? { "Content-Type": "application/json" } : {}) },
+        body: body ? JSON.stringify(body) : undefined, cache: "no-store",
+      });
+      return r;
+    },
+  };
+  const b64encode = (str) => { const bytes = new TextEncoder().encode(str); let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(bin); };
+  const b64decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, "")), (c) => c.charCodeAt(0)));
+  function mergeNotes(remote) {
+    let changed = false;
+    for (const [id, n] of Object.entries(remote.places || {})) {
+      if (!notes.places[id] || (n.t || 0) > (notes.places[id].t || 0)) { notes.places[id] = n; changed = true; }
+    }
+    if (changed) store.set("cs.notes", notes);
+    return changed;
+  }
+  async function pullNotes() {
+    if (!gh.token) return;
+    try {
+      const r = await gh.req("GET");
+      if (r.status === 404) { gh.sha = null; gh.err = null; return; }
+      if (!r.ok) throw new Error(r.status === 401 ? "token rejected" : r.status === 403 ? "token can't access the repo" : "GitHub " + r.status);
+      const j = await r.json();
+      gh.sha = j.sha; gh.err = null;
+      if (mergeNotes(JSON.parse(b64decode(j.content)))) { if (!document.activeElement?.matches?.(".notes input")) render(); renderMine(); }
+      gh.last = new Date();
+    } catch (e) { gh.err = e.message; }
+    renderSync();
+  }
+  function scheduleSync() { if (!gh.token) return; clearTimeout(gh.timer); gh.timer = setTimeout(pushNotes, 1500); renderSync("Saving…"); }
+  async function pushNotes(retry = true) {
+    if (!gh.token) return;
+    if (gh.busy) { gh.again = true; return; }
+    gh.busy = true;
+    try {
+      const r = await gh.req("PUT", { message: "Update notes", content: b64encode(JSON.stringify(notes, null, 1) + "\n"), ...(gh.sha ? { sha: gh.sha } : {}) });
+      if ((r.status === 409 || r.status === 422) && retry) { gh.busy = false; await pullNotes(); return pushNotes(false); }
+      if (!r.ok) throw new Error(r.status === 401 ? "token rejected" : r.status === 403 || r.status === 404 ? "token can't write to the repo" : "GitHub " + r.status);
+      gh.sha = (await r.json()).content.sha; gh.err = null; gh.last = new Date();
+    } catch (e) { gh.err = e.message; }
+    gh.busy = false;
+    renderSync();
+    if (gh.again) { gh.again = false; pushNotes(); }
+  }
+  function renderSync(msg) {
+    const n = Object.values(notes.places).filter(hasNote).length;
+    $("#syncBadge").textContent = gh.token ? (gh.err ? "· ⚠ not syncing" : "· ✓ syncing") : "· this device only";
+    $("#syncStatus").textContent = msg || (gh.token
+      ? (gh.err ? `Couldn't sync: ${gh.err}. Your notes are still saved in this browser.` : `${n} places saved${gh.last ? ` · last synced ${gh.last.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : ""}.`)
+      : `${n} places saved in this browser only.`);
+  }
 
   // ---------- map ----------
   const map = L.map("map");
@@ -594,7 +707,7 @@ footer a { color: inherit; }
     }
     return best;
   }
-  const isMarked = (i) => state.marked.has(i.id);
+  const isMarked = (i) => !!notes.places[i.id]?.closed;
   // Food places only show if they matched the hygiene register (confirmed or probably open).
   // Non-food shops (pharmacy, garden centre…) can't be on it, so they always show.
   const onRegister = (i) => !i.ver || ((i.ver.s === "v" || i.ver.s === "p") && !i.ver.osmOnly);
@@ -697,6 +810,16 @@ footer a { color: inherit; }
     if (i.week) h += `<ul class="week">${i.week.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>`;
     return h;
   }
+  function notesHtml(id) {
+    const n = notes.places[id] || {};
+    return `<div class="notes" data-nid="${esc(id)}">
+      <button type="button" class="star" data-star aria-pressed="${!!n.star}" aria-label="Star" title="Star">${n.star ? "★" : "☆"}</button>
+      ${FIELDS.map((f) => `<label>${f[0].toUpperCase() + f.slice(1)} <input data-f="${f}" inputmode="numeric" pattern="[1-5]" maxlength="1" value="${n[f] || ""}" aria-label="${f} rating 1 to 5"></label>`).join("")}
+    </div>`;
+  }
+  // "Mark as closed" only appears on an opened card, at the bottom, and needs a second tap.
+  const closeHtml = (i) => (state.activeKey === i.key && !isMarked(i)
+    ? `<div class="danger"><button type="button" class="linkish closebtn" data-mark="${esc(i.id)}">Mark as closed…</button></div>` : "");
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const monthName = (d) => `${MONTHS[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}`;
   function verHtml(i) {
@@ -704,13 +827,12 @@ footer a { color: inherit; }
     if (!v) return "";
     return v.s === "v" ? `<div class="ver v">✓ Confirmed open</div>` : `<div class="ver p">Probably open</div>`;
   }
-  function placeLinks(i, mode, markable = false) {
+  function placeLinks(i, mode) {
     const dir = `https://www.google.com/maps/dir/?api=1&origin=${i.station.lat},${i.station.lon}&destination=${i.lat},${i.lon}&travelmode=${mode}`;
     const g = i.gmaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(i.name + " " + (i.addr || "London"))}`;
     return `<div class="links"><a href="${esc(g)}" target="_blank" rel="noopener">Open in Google Maps</a>
       <a href="${dir}" target="_blank" rel="noopener">${mode === "walking" ? "Walking" : "Transit"} directions</a>
-      ${i.web ? `<a href="${esc(safeUrl(i.web))}" target="_blank" rel="noopener">Website</a>` : ""}
-      ${markable && i.src === "osm" && !isMarked(i) ? `<button type="button" class="linkish mark" data-mark="${esc(i.id)}">Mark as closed</button>` : ""}</div>`;
+      ${i.web ? `<a href="${esc(safeUrl(i.web))}" target="_blank" rel="noopener">Website</a>` : ""}</div>`;
   }
   function nearCard(i) {
     return `<article class="card ${i.lvl < 3 ? "maybe" : ""} ${state.activeKey === i.key ? "active" : ""}" data-key="${esc(i.key)}">
@@ -720,7 +842,7 @@ footer a { color: inherit; }
       ${verHtml(i)}${hoursHtml(i)}
       <div class="meta"><span class="st">from ${esc(i.station.name)}</span>
         ${i.addr ? `<span>${esc(i.addr)}</span>` : ""}</div>
-      ${extrasHtml(i)}${placeLinks(i, "walking", true)}
+      ${extrasHtml(i)}${placeLinks(i, "walking")}${notesHtml(i.id)}${closeHtml(i)}
     </article>`;
   }
   function farCard(i) {
@@ -732,7 +854,7 @@ footer a { color: inherit; }
       <div class="meta"><span class="st">from ${esc(i.station.name)}</span>${i.estimated ? "<span>rough estimate</span>" : ""}
         <span class="legs">${i.legs.map((l) => `<span class="leg">${esc(l)}</span>`).join("")}</span>
         ${i.addr ? `<span>${esc(i.addr)}</span>` : ""}</div>
-      ${extrasHtml(i)}${placeLinks(i, "transit")}
+      ${extrasHtml(i)}${placeLinks(i, "transit")}${notesHtml(i.id)}
     </article>`;
   }
 
@@ -766,6 +888,8 @@ footer a { color: inherit; }
         .on("click", () => setActive(i.key, false));
     });
 
+    state.itemsByKey = {};
+    [...all, ...(far || [])].forEach((i) => (state.itemsByKey[i.id] = i));
     const box = $("#results");
     if (!state.query || state.loading) { box.innerHTML = ""; return; }
     const where = state.stationFilter ? STATIONS.find((s) => s.id === state.stationFilter).name : "the line";
@@ -784,6 +908,31 @@ footer a { color: inherit; }
       } else html += `<button type="button" class="more" id="moreBtn">Also look off the line →</button>`;
     }
     box.innerHTML = html;
+  }
+
+  function renderMine() {
+    const stop = $("#mineStop").value, filter = $("#mineFilter").value;
+    const avg = (n) => { const v = FIELDS.map((f) => n[f]).filter(Boolean); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; };
+    const list = Object.entries(notes.places).map(([id, n]) => ({ id, ...n }))
+      .filter((n) => n.name && (!stop || n.stop === stop))
+      .filter((n) => filter === "closed" ? n.closed : !n.closed && (filter === "star" ? n.star : filter === "rated" ? FIELDS.some((f) => n[f]) : n.star || FIELDS.some((f) => n[f])))
+      .sort((a, b) => (b.star ? 1 : 0) - (a.star ? 1 : 0) || avg(b) - avg(a) || a.name.localeCompare(b.name));
+    const stopName = (id) => STATIONS.find((s) => s.id === id)?.name || "";
+    $("#mineList").innerHTML = list.length ? list.map((n) => {
+      const a = avg(n);
+      const g = n.gmaps || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(n.name + " " + (n.addr || "London"))}`;
+      return `<article class="card" data-mine="${esc(n.id)}">
+        <div class="name">${esc(n.name)}</div>
+        <div class="cost">${a ? `<b class="avg">${a.toFixed(1)}</b><span>avg rating</span>` : ""}</div>
+        <div class="kind">${esc(n.kind || "")}</div>
+        <div class="meta"><span class="st">${esc(stopName(n.stop))}</span>${n.addr ? `<span>${esc(n.addr)}</span>` : ""}</div>
+        <div class="links"><a href="${esc(g)}" target="_blank" rel="noopener">Open in Google Maps</a>
+          <button type="button" class="linkish" data-showmap="${esc(n.id)}">Show on map</button>
+          ${n.closed ? `<button type="button" class="linkish" data-unmark="${esc(n.id)}">Not closed after all</button>` : ""}</div>
+        ${n.closed ? "" : notesHtml(n.id)}
+      </article>`;
+    }).join("") : `<div class="empty">${filter === "closed" ? "Nothing marked closed" : "Nothing starred or rated"}${stop ? " at " + esc(stopName(stop)) : ""} yet.</div>`;
+    renderSync();
   }
 
   function fitToResults() {
@@ -870,14 +1019,67 @@ footer a { color: inherit; }
     if (e.target.closest("#moreBtn")) { runFar(); return; }
     const mk = e.target.closest("[data-mark]");
     if (mk) {
-      state.marked.add(mk.dataset.mark);
-      store.set("cs.markedClosed", [...state.marked]);
-      render(); return;
+      if (!mk.dataset.armed) { // first tap only arms it
+        mk.dataset.armed = "1"; mk.textContent = "Tap again to confirm it's closed";
+        setTimeout(() => { if (mk.isConnected) { delete mk.dataset.armed; mk.textContent = "Mark as closed…"; } }, 4000);
+        return;
+      }
+      const it = state.itemsByKey[mk.dataset.mark];
+      if (it) setNote(noteInfo(it), { closed: true });
+      state.activeKey = null; render(); return;
     }
+    if (e.target.closest(".notes")) return; // handled below; don't open/close the card
     if (e.target.closest("a")) return;
     const c = e.target.closest(".card");
     if (c) setActive(c.dataset.key === state.activeKey ? null : c.dataset.key, c.dataset.key !== state.activeKey);
   });
+  // star + ratings, on result cards and in My places
+  function infoFor(id) { const it = state.itemsByKey[id]; return it ? noteInfo(it) : { id, ...notes.places[id] }; }
+  for (const root of [$("#results"), $("#mineList")]) {
+    root.addEventListener("click", (e) => {
+      const st = e.target.closest("[data-star]");
+      if (st) {
+        const id = st.closest(".notes").dataset.nid, on = !notes.places[id]?.star;
+        setNote(infoFor(id), { star: on });
+        document.querySelectorAll(`.notes[data-nid="${CSS.escape(id)}"] .star`).forEach((b) => { b.setAttribute("aria-pressed", on); b.textContent = on ? "★" : "☆"; });
+      }
+    });
+    root.addEventListener("input", (e) => {
+      const inp = e.target.closest(".notes input");
+      if (!inp) return;
+      const v = (inp.value.match(/[1-5]/g) || []).pop() || "";
+      inp.value = v;
+      const id = inp.closest(".notes").dataset.nid;
+      setNote(infoFor(id), { [inp.dataset.f]: v ? +v : null });
+      document.querySelectorAll(`.notes[data-nid="${CSS.escape(id)}"] input[data-f="${inp.dataset.f}"]`).forEach((x) => { if (x !== inp) x.value = v; });
+    });
+    root.addEventListener("focusin", (e) => { if (e.target.matches(".notes input")) e.target.select(); });
+  }
+  $("#mineList").addEventListener("click", (e) => {
+    const um = e.target.closest("[data-unmark]"), sm = e.target.closest("[data-showmap]");
+    if (um) { setNote(infoFor(um.dataset.unmark), { closed: false }); render(); }
+    if (sm) {
+      const n = notes.places[sm.dataset.showmap];
+      if (n?.lat) { L.popup().setLatLng([n.lat, n.lon]).setContent(`<b>${esc(n.name)}</b>`).openOn(map); map.setView([n.lat, n.lon], 16); document.getElementById("map").scrollIntoView({ behavior: "smooth" }); }
+    }
+  });
+  $("#mineStop").innerHTML = `<option value="">All stops</option>` + STATIONS.map((s) => `<option value="${s.id}">${esc(s.name)}</option>`).join("");
+  $("#mineStop").addEventListener("change", renderMine);
+  $("#mineFilter").addEventListener("change", renderMine);
+  $("#ghtoken").value = gh.token ? "••••••••" + gh.token.slice(-4) : "";
+  $("#ghsave").textContent = gh.token ? "Remove" : "Save";
+  $("#ghsave").addEventListener("click", async () => {
+    if (gh.token) { store.del("cs.ghToken"); gh.token = ""; gh.sha = null; $("#ghtoken").value = ""; $("#ghsave").textContent = "Save"; renderSync(); return; }
+    const t = $("#ghtoken").value.trim();
+    if (!t) return;
+    store.set("cs.ghToken", t); gh.token = t;
+    $("#ghtoken").value = "••••••••" + t.slice(-4); $("#ghsave").textContent = "Remove";
+    renderSync("Connecting…");
+    await pullNotes();
+    if (!gh.err) await pushNotes();
+  });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pullNotes(); });
+
   $("#verifiedOnly").checked = state.verifiedOnly;
   $("#verifiedOnly").addEventListener("change", (e) => { state.verifiedOnly = e.target.checked; store.set("cs.verifiedOnly", state.verifiedOnly); render(); });
   $("#openOnly").checked = state.openOnly;
@@ -896,6 +1098,8 @@ footer a { color: inherit; }
 
   renderSource();
   render();
+  renderMine();
+  pullNotes();
   const initial = new URLSearchParams(location.search).get("q");
   if (initial) search(initial);
 })();

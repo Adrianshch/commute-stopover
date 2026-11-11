@@ -43,6 +43,19 @@ python3 -m http.server 8000
 
 Then open http://localhost:8000/?q=dosa
 
+## Saving stars and ratings
+
+Each result has a ☆ star and three 1–5 boxes (Health, Taste, Value). **My places** at the bottom lists everything you've starred or rated, filtered by stop. Notes save in the browser straight away. To make them permanent and shared between devices, they also sync to a private repo, `Adrianshch/commute-stopover-notes` (file `notes.json`, one commit per save, so there's a full history):
+
+1. Create the private repo (empty is fine): <https://github.com/new?name=commute-stopover-notes&visibility=private>
+2. Create a fine-grained token: <https://github.com/settings/personal-access-tokens/new>
+   - Name: `commute-stopover notes`; Expiration: the longest offered
+   - Repository access: **Only select repositories** → `commute-stopover-notes`
+   - Permissions → Repository permissions → **Contents: Read and write** (nothing else)
+3. On the site, open **Save stars & ratings to GitHub**, paste the token and press **Save**. Do the same on your phone.
+
+The token can only touch that one notes repo. It's stored only in the browser, never in this public repo.
+
 ## Google Maps mode (paused)
 
 The page also supports Google Places search (ratings, live hours, photos) once a key is pasted into the "Google Maps data" panel. It's paused for now; the setup notes are kept below.
