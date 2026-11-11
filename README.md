@@ -1,6 +1,6 @@
 # Commute Stopover
 
-Find food and errands within a 15-minute walk of my Central line commute (Woodford ⇄ Holborn) and of Bush House (work, walked from Holborn). Results are sorted by walk time from the nearest stop.
+Find food and errands within a 15-minute walk of my Central line commute (Woodford ⇄ Holborn), and within 20 minutes of Bush House (work, walked from Holborn). Results are sorted by walk time from the nearest stop.
 
 ## How search works (free, no API keys)
 
@@ -13,6 +13,7 @@ Find food and errands within a 15-minute walk of my Central line commute (Woodfo
   - *chains*: known menus (Wagamama → ramen, Dishoom → lassi)
 - **Menus:** `scripts/crawl_menus.py` reads each restaurant website's home and menu pages, PDF menus included, and records which dish words appear (`data/menus.json`).
 - Results come in two groups: **Serves X** (confirmed by name, cuisine tag, menu or chain) and **Might serve X** (the cuisine usually has it).
+- **Closed places:** `scripts/verify_places.py` checks every food place against the [Food Standards Agency hygiene register](https://ratings.food.gov.uk/open-data) (`data/verify.json`). Every UK food business has to be on it, and closed ones drop off. Results show "✓ On the food hygiene register" (with rating and last inspection), "Not verified", or, hidden by default, "Likely closed" (dropped off the register, or its website is gone or says it has closed). The register only covers food businesses, so pharmacies, garden centres and other shops aren't checked.
 - **Off the line:** if fewer than 3 places are confirmed nearby, it searches wider London with [Photon](https://photon.komoot.io) and shows the TfL Journey Planner time from the best stop.
 
 There's no free source of reviews, so unlike Google it can't search review text. Menus and the knowledge file stand in for that.
@@ -23,6 +24,7 @@ There's no free source of reviews, so unlike Google it can't search review text.
 pip install pypdf
 python3 scripts/build_places.py
 python3 scripts/crawl_menus.py
+python3 scripts/verify_places.py
 ```
 
 The `Refresh places and menus` workflow does this every Monday, and GitHub Pages redeploys automatically.

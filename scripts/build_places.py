@@ -8,7 +8,8 @@ import json, os, sys, time, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 STATIONS = json.load(open(os.path.join(HERE, "..", "data", "stations.json")))
-RADIUS_M = 925  # ~15 min walk at 80 m/min with a 1.3 street-circuity factor
+WALK_M_PER_MIN, CIRCUITY = 80, 1.3
+radius = lambda s: round(s.get("max_walk", 15) * WALK_M_PER_MIN / CIRCUITY)  # 15 min ≈ 923 m, 20 min ≈ 1231 m
 ENDPOINTS = [
     "https://overpass-api.de/api/interpreter",
     "https://overpass.private.coffee/api/interpreter",
@@ -25,17 +26,19 @@ SKIP_AMENITY = {
 }
 KEEP_TAGS = ["name", "brand", "shop", "amenity", "craft", "leisure", "healthcare", "cuisine",
              "opening_hours", "website", "contact:website", "brand:website", "addr:housenumber", "addr:street", "addr:postcode",
-             "diet:vegan", "diet:vegetarian", "diet:halal", "diet:gluten_free", "description"]
+             "diet:vegan", "diet:vegetarian", "diet:halal", "diet:gluten_free", "description",
+             "fhrs:id", "check_date", "survey:date"]
 SHORT = {"addr:housenumber": "hn", "addr:street": "st", "addr:postcode": "pc", "opening_hours": "oh",
          "website": "web", "contact:website": "web", "brand:website": "bweb", "diet:vegan": "vegan",
-         "diet:vegetarian": "veg", "diet:halal": "halal", "diet:gluten_free": "gf", "description": "desc"}
+         "diet:vegetarian": "veg", "diet:halal": "halal", "diet:gluten_free": "gf", "description": "desc",
+         "fhrs:id": "fhrs", "check_date": "chk", "survey:date": "chk"}
 
 
 def query():
     parts = []
     for s in STATIONS:
         for k in KEYS:
-            parts.append(f'nwr(around:{RADIUS_M},{s["lat"]},{s["lon"]})["{k}"]["name"];')
+            parts.append(f'nwr(around:{radius(s)},{s["lat"]},{s["lon"]})["{k}"]["name"];')
     return "[out:json][timeout:180];(\n" + "\n".join(parts) + "\n);out center tags;"
 
 
@@ -81,7 +84,7 @@ def main():
     out.sort(key=lambda p: p["id"])
     path = os.path.join(HERE, "..", "data", "places.json")
     with open(path, "w") as f:
-        json.dump({"generated": time.strftime("%Y-%m-%d"), "radius_m": RADIUS_M, "places": out}, f,
+        json.dump({"generated": time.strftime("%Y-%m-%d"), "places": out}, f,
                   separators=(",", ":"), ensure_ascii=False)
     print(f"wrote {len(out)} places -> {path} ({os.path.getsize(path)//1024} KB)", file=sys.stderr)
 

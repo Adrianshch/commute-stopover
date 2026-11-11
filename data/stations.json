@@ -82,6 +82,7 @@
   "name": "Bush House",
   "lat": 51.5128,
   "lon": -0.1173,
-  "kind": "walk"
+  "kind": "walk",
+  "max_walk": 20
  }
 ]

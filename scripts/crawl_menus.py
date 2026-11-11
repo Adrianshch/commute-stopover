@@ -6,7 +6,7 @@ website's host, so a sushi bar whose menu lists ramen shows up for "ramen".
 
 Run:  python3 scripts/crawl_menus.py      (optional: pip install pypdf  -> also reads PDF menus)
 """
-import concurrent.futures as cf, html.parser, io, json, os, re, sys, time, unicodedata, urllib.parse, urllib.request
+import concurrent.futures as cf, html.parser, io, json, os, re, socket, sys, time, unicodedata, urllib.error, urllib.parse, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.join(HERE, "..", "data")
@@ -14,6 +14,11 @@ FOOD_AMENITIES = {"restaurant", "fast_food", "cafe", "food_court", "pub", "bar",
 FOOD_SHOPS = {"bakery", "pastry", "deli", "confectionery", "coffee", "tea"}
 SKIP_HOSTS = re.compile(r"(facebook|instagram|twitter|x\.com|tiktok|tripadvisor|deliveroo|ubereats|just-eat|justeat|google|linktr\.ee|yelp|opentable|resy|sevenrooms|wikipedia|wix\.com$)")
 MENU_LINK = re.compile(r"menu|food|eat|dish|carte|drinks|lunch|dinner|brunch|breakfast", re.I)
+CLOSED_TEXT = re.compile(r"(permanently closed|closed permanently|ceased trading|closed (its|our) doors (for good|permanently)|"
+                         r"(we|restaurant|cafe|shop|bar) (has|have) (now )?(permanently )?closed( down| for good| permanently)?\b(?! (on|for|at|from|today|tomorrow|until|over))|"
+                         r"sadly,? (we|the restaurant|the cafe) (has|have) closed|closing (our doors )?for good|we('| ha)ve closed for good|this (restaurant|venue|site) (is|has) (now )?closed)", re.I)
+TEMP_TEXT = re.compile(r"(temporarily closed|closed for refurbishment|closed for renovation)", re.I)
+PARKED = re.compile(r"(this domain (is|may be) for sale|buy this domain|domain (has expired|is parked)|parked free|hugedomains|sedo domain)", re.I)
 UA = "Mozilla/5.0 (compatible; commute-stopover/1.0; personal menu index)"
 MAX_BYTES = 2_500_000
 
@@ -84,12 +89,20 @@ def page_text(url):
 
 
 def scan_host(base, terms):
+    """Returns {"d": [dish words], "s": "ok"|"dead"|"closed"|"temp"|"unknown"}."""
     found, pages = set(), 0
     try:
         final, text, links = page_text(base)
         pages += 1
+    except urllib.error.HTTPError as e:
+        return {"d": [], "s": "dead" if e.code in (404, 410) else "unknown"}
+    except urllib.error.URLError as e:
+        dns = isinstance(e.reason, socket.gaierror) or "Name or service not known" in str(e.reason) or "nodename nor servname" in str(e.reason)
+        return {"d": [], "s": "dead" if dns else "unknown"}
     except Exception:  # noqa: BLE001
-        return None
+        return {"d": [], "s": "unknown"}
+    head = text[:20000]
+    status = "dead" if PARKED.search(head) else "closed" if CLOSED_TEXT.search(head) else "temp" if TEMP_TEXT.search(head) else "ok"
     corpus = [norm(text)]
     host = urllib.parse.urlparse(final).netloc
     cands = []
@@ -122,7 +135,7 @@ def scan_host(base, terms):
     for canon, variants in terms:
         if any(v in blob for v in variants):
             found.add(canon)
-    return sorted(found)
+    return {"d": sorted(found), "s": status}
 
 
 def main():
@@ -143,20 +156,25 @@ def main():
                 continue
             hosts.setdefault(host.removeprefix("www."), w)
     print(f"scanning {len(hosts)} websites…", file=sys.stderr)
-    out, ok, t0 = {}, 0, time.time()
+    out, status, ok, t0 = {}, {}, 0, time.time()
     with cf.ThreadPoolExecutor(24) as ex:
         futs = {ex.submit(scan_host, url, terms): h for h, url in hosts.items()}
         for i, f in enumerate(cf.as_completed(futs), 1):
-            res = f.result()
-            if res is not None:
+            res, h = f.result(), futs[f]
+            if res["s"] != "ok":
+                status[h] = res["s"]
+            if res["s"] in ("ok", "temp", "closed"):
                 ok += 1
-                if res:
-                    out[futs[f]] = res
+            if res["d"]:
+                out[h] = res["d"]
             if i % 100 == 0:
                 print(f"  {i}/{len(hosts)}  ({time.time()-t0:.0f}s)", file=sys.stderr)
     path = os.path.join(DATA, "menus.json")
-    json.dump({"generated": time.strftime("%Y-%m-%d"), "scanned": len(hosts), "reachable": ok, "hosts": dict(sorted(out.items()))},
+    json.dump({"generated": time.strftime("%Y-%m-%d"), "scanned": len(hosts), "reachable": ok, "hosts": dict(sorted(out.items())),
+               "status": dict(sorted((h, v) for h, v in status.items() if v != "unknown"))},
               open(path, "w"), separators=(",", ":"), ensure_ascii=False)
+    from collections import Counter
+    print("site status:", Counter(status.values()), file=sys.stderr)
     print(f"reachable {ok}/{len(hosts)}, with dishes {len(out)} -> {path} ({os.path.getsize(path)//1024} KB)", file=sys.stderr)
 
 
